@@ -194,120 +194,7 @@ export function initializeECCDatabase() {
   // 2. Projects DB
   let projects = getFromFirebaseCache(PROJECTS_KEY);
   if (!projects) {
-    projects = [
-      {
-        id: 'proj_1',
-        name: 'โครงการพัฒนาหมู่บ้านเศรษฐกิจพอเพียงต้นแบบ',
-        district: 'ตำบลกะทู้',
-        budget: 450000,
-        spent: 450000,
-        status: 'เสร็จแล้ว',
-        progress: 100,
-        stage: 'ส่งมอบงานเรียบร้อย',
-        lat: 7.9150,
-        lng: 98.3400,
-        manager: 'นายวิเชียร สุขสำราญ',
-        image: 'https://images.unsplash.com/photo-1590682680394-b5594b596387?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_2',
-        name: 'โครงการส่งเสริมกระบวนการเรียนรู้ชุมชนเพื่อการพึ่งตนเอง',
-        district: 'ตำบลป่าตอง',
-        budget: 320000,
-        spent: 280000,
-        status: 'ดำเนินการ',
-        progress: 75,
-        stage: 'กำลังดำเนินกิจกรรมรุ่นที่ 2',
-        lat: 7.8920,
-        lng: 98.2970,
-        manager: 'นางดวงพร จันทร์สว่าง',
-        image: 'https://images.unsplash.com/photo-1542435503-956c469947f6?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_3',
-        name: 'โครงการขยายผลการพัฒนาศูนย์จัดการกองทุนชุมชนดีเด่น',
-        district: 'ตำบลกมลา',
-        budget: 250000,
-        spent: 240000,
-        status: 'เสร็จแล้ว',
-        progress: 100,
-        stage: 'สรุปบทเรียนและปิดโครงการ',
-        lat: 7.9540,
-        lng: 98.2850,
-        manager: 'นายสมบัติ ศรีเมือง',
-        image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_4',
-        name: 'โครงการพัฒนาบรรจุภัณฑ์ผลิตภัณฑ์ OTOP สู่สากล',
-        district: 'ตำบลกะทู้',
-        budget: 500000,
-        spent: 250000,
-        status: 'ดำเนินการ',
-        progress: 50,
-        stage: 'ตรวจรับบรรจุภัณฑ์ต้นแบบ',
-        lat: 7.9130,
-        lng: 98.3380,
-        manager: 'นางวรรณี งามดี',
-        image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_5',
-        name: 'โครงการส่งเสริมช่องทางจำหน่ายผลิตภัณฑ์ชุมชนออนไลน์',
-        district: 'ตำบลป่าตอง',
-        budget: 380000,
-        spent: 375000,
-        status: 'เสร็จแล้ว',
-        progress: 100,
-        stage: 'จัดตั้งเพจร้านค้าชุมชนสำเร็จ',
-        lat: 7.8950,
-        lng: 98.2990,
-        manager: 'นายธนา วงศ์คำ',
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_6',
-        name: 'โครงการพัฒนาทักษะอาชีพระยะสั้นแก้ปัญหาความยากจน',
-        district: 'ตำบลกมลา',
-        budget: 600000,
-        spent: 420000,
-        status: 'ล่าช้า',
-        progress: 40,
-        stage: 'อยู่ระหว่างขอขยายเวลาสัญญาจ้างวิทยากร',
-        lat: 7.9510,
-        lng: 98.2820,
-        manager: 'นายเกรียงศักดิ์ รักดี',
-        image: 'https://images.unsplash.com/photo-1521791136368-1a46827d0515?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_7',
-        name: 'โครงการปรับปรุงและพัฒนาอาชีพสตรีระดับอำเภอ',
-        district: 'ตำบลกะทู้',
-        budget: 280000,
-        spent: 250000,
-        status: 'ดำเนินการ',
-        progress: 85,
-        stage: 'อยู่ระหว่างฝึกปฏิบัติกลุ่มย่อย',
-        lat: 7.9170,
-        lng: 98.3420,
-        manager: 'นางจารุวรรณ ปัญญาดี',
-        image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=150&auto=format&fit=crop'
-      },
-      {
-        id: 'proj_8',
-        name: 'โครงการสร้างรายได้จากกิจกรรมการท่องเที่ยววิถีชุมชน',
-        district: 'ตำบลป่าตอง',
-        budget: 800000,
-        spent: 480000,
-        status: 'ล่าช้า',
-        progress: 30,
-        stage: 'จัดทำป้ายเส้นทางนำเที่ยวล่าช้าเนื่องจากฝนตกหนัก',
-        lat: 7.8880,
-        lng: 98.2950,
-        manager: 'นายณรงค์ สีทอง',
-        image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=150&auto=format&fit=crop'
-      }
-    ];
+    projects = [];
     saveToFirebase(PROJECTS_KEY, projects);
   } else {
     projects = JSON.parse(projects);
@@ -317,67 +204,8 @@ export function initializeECCDatabase() {
   let groups = getFromFirebaseCache(GROUPS_KEY);
   
   if (!groups) {
-    const initial6 = [
-      { id: 'group_1', name: 'กองทุนแม่ของแผ่นดินบ้านดง', type: 'กองทุนแม่', district: 'ตำบลกะทู้', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)', president: 'นายสมชาย ใจดี', phone: '081-234-5678', members: 35, status: 'ปกติ' },
-      { id: 'group_2', name: 'กลุ่มออมทรัพย์เพื่อการผลิตบ้านดง', type: 'กลุ่มออมทรัพย์', district: 'ตำบลกะทู้', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)', president: 'นางสาวสุภัญญา รักดี', phone: '082-345-6789', members: 28, status: 'ปกติ' },
-      { id: 'group_3', name: 'กข.คจ. บ้านดง', type: 'กข.คจ.', district: 'ตำบลกะทู้', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)', president: 'นายวิชัย มั่นคง', phone: '083-456-7890', members: 15, status: 'ติดตาม' },
-      { id: 'group_4', name: 'ศูนย์เรียนรู้การพัฒนาชุมชนบ้านดง', type: 'ศูนย์เรียนรู้', district: 'ตำบลกะทู้', agency: 'ที่ว่าการอำเภอ (ฝ่ายปกครอง)', president: 'นางทองดี ศรีงาม', phone: '084-567-8901', members: 22, status: 'ปกติ' },
-      { id: 'group_5', name: 'กองทุนพัฒนาบทบาทสตรีบ้านดง', type: 'กองทุนสตรี', district: 'ตำบลกะทู้', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)', president: 'นางบุญมี แก้วใส', phone: '085-678-9012', members: 45, status: 'ปกติ' },
-      { id: 'group_6', name: 'คณะกรรมการพัฒนาสตรีบ้านดง', type: 'คณะกรรมการสตรี', district: 'ตำบลกะทู้', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)', president: 'นางอารีย์ แสงสว่าง', phone: '086-789-0123', members: 15, status: 'ปกติ' }
-    ];
-
-    const seededGroups = [...initial6];
-    let idCounter = 7;
-
-    const groupTypes = GROUP_TYPES;
-    const districts = DISTRICTS_LIST;
-    const agencies = AGENCIES_LIST;
-
-    for (let i = 0; i < 336; i++) {
-      const type = groupTypes[i % groupTypes.length];
-      const district = districts[Math.floor(i / (336 / districts.length)) % districts.length];
-      const agency = agencies[Math.floor(i / (336 / (districts.length * agencies.length))) % agencies.length];
-      
-      const villageName = getRandomItem(VILLAGES);
-      const presidentPrefix = getRandomItem(['นาย', 'นาง', 'นางสาว']);
-      const president = `${presidentPrefix}${getRandomItem(FIRST_NAMES)} ${getRandomItem(LAST_NAMES)}`;
-      
-      let name = '';
-      if (type === 'กองทุนแม่') {
-        name = `กองทุนแม่ของแผ่นดิน${villageName} ${district}`;
-      } else if (type === 'กลุ่มออมทรัพย์') {
-        name = `กลุ่มออมทรัพย์เพื่อการผลิต${villageName} ${district}`;
-      } else if (type === 'กข.คจ.') {
-        name = `กข.คจ. ${villageName} ${district}`;
-      } else if (type === 'ศูนย์เรียนรู้') {
-        name = `ศูนย์เรียนรู้การพัฒนาชุมชน${villageName} ${district}`;
-      } else if (type === 'กองทุนสตรี') {
-        name = `กองทุนพัฒนาบทบาทสตรี${villageName} ${district}`;
-      } else if (type === 'คณะกรรมการสตรี') {
-        name = `คณะกรรมการพัฒนาสตรี${villageName} ${district}`;
-      } else {
-        name = `${type}${villageName} ${district}`;
-      }
-
-      const members = Math.floor(Math.random() * 40) + 10;
-      const rand = Math.random();
-      const status = rand > 0.2 ? 'ปกติ' : rand > 0.08 ? 'ติดตาม' : 'แก้ไข';
-
-      seededGroups.push({
-        id: `group_${idCounter++}`,
-        name,
-        type,
-        district,
-        agency,
-        president,
-        phone: generatePhone(),
-        members,
-        status
-      });
-    }
-
-    saveToFirebase(GROUPS_KEY, seededGroups);
-    groups = seededGroups;
+    groups = [];
+    saveToFirebase(GROUPS_KEY, groups);
   } else {
     groups = JSON.parse(groups);
   }
@@ -385,20 +213,7 @@ export function initializeECCDatabase() {
   // 4. Monthly Budget Allocation
   let budgetMonthly = getFromFirebaseCache(BUDGET_MONTHLY_KEY);
   if (!budgetMonthly) {
-    budgetMonthly = [
-      { month: 'ต.ค.', target: 12000000, actual: 11500000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'พ.ย.', target: 15000000, actual: 13800000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'ธ.ค.', target: 18000000, actual: 16500000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'ม.ค.', target: 22000000, actual: 20200000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'ก.พ.', target: 26000000, actual: 24100000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'มี.ค.', target: 35000000, actual: 32000000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'เม.ย.', target: 48000000, actual: 44200000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'พ.ค.', target: 65000000, actual: 59800000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'มิ.ย.', target: 82000000, actual: 75900000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'ก.ค.', target: 110000000, actual: 98000000, status: 'เบิกจ่ายแล้ว' },
-      { month: 'ส.ค.', target: 132000000, actual: 0, status: 'ยังไม่เบิกจ่าย' },
-      { month: 'ก.ย.', target: 153500000, actual: 0, status: 'ยังไม่เบิกจ่าย' }
-    ];
+    budgetMonthly = [];
     saveToFirebase(BUDGET_MONTHLY_KEY, budgetMonthly);
   } else {
     budgetMonthly = JSON.parse(budgetMonthly).map(b => ({ 
@@ -412,13 +227,7 @@ export function initializeECCDatabase() {
   // 5. KPIs DB
   let kpis = getFromFirebaseCache(KPIS_KEY);
   if (!kpis) {
-    kpis = [
-      { id: 'kpi_1', name: 'ร้อยละของหมู่บ้านที่มีการจัดตั้งกองทุนแม่สำเร็จ', target: 100, actual: 95, unit: '%', status: 'ดำเนินการ', district: 'ตำบลกะทู้', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)' },
-      { id: 'kpi_2', name: 'จำนวนกลุ่มออมทรัพย์เพื่อการผลิตที่ผ่านเกณฑ์ประเมินระดับดี', target: 15, actual: 12, unit: 'กลุ่ม', status: 'ดำเนินการ', district: 'ตำบลป่าตอง', agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)' },
-      { id: 'kpi_3', name: 'ร้อยละการชำระคืนเงินกู้ยืมกองทุนสตรีตรงตามกำหนด', target: 90, actual: 92, unit: '%', status: 'สำเร็จ', district: 'ตำบลกมลา', agency: 'สำนักงานพัฒนาสังคมและความมั่นคงของมนุษย์ (พม.)' },
-      { id: 'kpi_4', name: 'จำนวนศูนย์เรียนรู้การพัฒนาชุมชนต้นแบบที่มีผลงานประจักษ์', target: 5, actual: 2, unit: 'แห่ง', status: 'มีความเสี่ยง', district: 'ตำบลกะทู้', agency: 'ที่ว่าการอำเภอ (ฝ่ายปกครอง)' },
-      { id: 'kpi_5', name: 'ร้อยละของสมาชิกกองทุนแม่ที่เข้าร่วมการฝึกอบรมสัมมาชีพ', target: 80, actual: 85, unit: '%', status: 'สำเร็จ', district: 'ตำบลป่าตอง', agency: 'ศูนย์ส่งเสริมการเรียนรู้อำเภอ (สกร./กศน.)' }
-    ];
+    kpis = [];
     saveToFirebase(KPIS_KEY, kpis);
   } else {
     kpis = JSON.parse(kpis);
@@ -427,21 +236,7 @@ export function initializeECCDatabase() {
   // 6. Reports DB
   let reports = getFromFirebaseCache(REPORTS_KEY);
   if (!reports) {
-    reports = [
-      { id: 'rep_1', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'ต.ค.', status: 'รายงานแล้ว', deadlineDate: '20 ต.ค. 2567', updatedAt: '2026-06-25' },
-      { id: 'rep_2', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'พ.ย.', status: 'รายงานแล้ว', deadlineDate: '20 พ.ย. 2567', updatedAt: '2026-06-25' },
-      { id: 'rep_3', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'ธ.ค.', status: 'รายงานแล้ว', deadlineDate: '20 ธ.ค. 2567', updatedAt: '2026-06-25' },
-      { id: 'rep_4', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'ม.ค.', status: 'รายงานแล้ว', deadlineDate: '20 ม.ค. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_5', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'ก.พ.', status: 'รายงานแล้ว', deadlineDate: '20 ก.พ. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_6', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'มี.ค.', status: 'รายงานแล้ว', deadlineDate: '20 มี.ค. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_7', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'เม.ย.', status: 'รายงานแล้ว', deadlineDate: '20 เม.ย. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_8', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'พ.ค.', status: 'กำลังดำเนินการ', deadlineDate: '20 พ.ค. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_9', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'มิ.ย.', status: 'ยังไม่รายงาน', deadlineDate: '20 มิ.ย. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_10', projectName: 'โครงการวัดประชารัฐสร้างสุข', month: 'ก.ค.', status: 'ยังไม่รายงาน', deadlineDate: '20 ก.ค. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_11', projectName: 'โครงการหนึ่งตำบลหนึ่งผลิตภัณฑ์ (OTOP) กะทู้', month: 'พ.ค.', status: 'รายงานแล้ว', deadlineDate: '20 พ.ค. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_12', projectName: 'โครงการหนึ่งตำบลหนึ่งผลิตภัณฑ์ (OTOP) กะทู้', month: 'มิ.ย.', status: 'กำลังดำเนินการ', deadlineDate: '20 มิ.ย. 2568', updatedAt: '2026-06-25' },
-      { id: 'rep_13', projectName: 'โครงการพัฒนาหมู่บ้านเศรษฐกิจพอเพียงกะทู้', month: 'มิ.ย.', status: 'รายงานแล้ว', deadlineDate: '20 มิ.ย. 2568', updatedAt: '2026-06-25' }
-    ];
+    reports = [];
     saveToFirebase(REPORTS_KEY, reports);
   } else {
     reports = JSON.parse(reports);
@@ -457,10 +252,7 @@ export function initializeECCDatabase() {
   // 8. Women Projects
   let womenProjects = getFromFirebaseCache(WOMEN_PROJECTS_KEY);
   if (!womenProjects) {
-    womenProjects = [
-      { id: 'wp_1', name: 'กลุ่มทอผ้าสตรีล้านนา', groupsCount: '42 กลุ่ม', paybackRate: '98.5%' },
-      { id: 'wp_2', name: 'กลุ่มแปรรูปอาหารสตรี', groupsCount: '35 กลุ่ม', paybackRate: '96.2%' }
-    ];
+    womenProjects = [];
     saveToFirebase(WOMEN_PROJECTS_KEY, womenProjects);
   }
 
@@ -474,9 +266,7 @@ export function initializeECCDatabase() {
   // 10. Custom Special Menus
   let customMenus = getFromFirebaseCache(CUSTOM_SPECIAL_MENUS_KEY);
   if (!customMenus) {
-    customMenus = [
-      { id: 'csm_1', name: 'โครงการพระราชดำริกะทู้', content: 'สรุปการดำเนินงานโครงการอันเนื่องมาจากพระราชดำริในพื้นที่อำเภอกะทู้:\n\n1. โครงการพัฒนาพื้นที่ลุ่มน้ำกมลา อันเนื่องมาจากพระราชดำริ\n2. โครงการอ่างเก็บน้ำบางวาด (แหล่งน้ำสำคัญหล่อเลี้ยงการประปาและการท่องเที่ยวอำเภอกะทู้)\n3. กิจกรรมปลูกป่าทดแทนในเขตป่าสงวนแห่งชาติเทือกเขานาคเกิด' }
-    ];
+    customMenus = [];
     saveToFirebase(CUSTOM_SPECIAL_MENUS_KEY, customMenus);
   }
 
@@ -1053,17 +843,7 @@ const DOCUMENTS_KEY = 'ecc_documents_db';
 export function getDocuments() {
   let docs = getFromFirebaseCache(DOCUMENTS_KEY);
   if (!docs) {
-    docs = [
-      { id: 'doc_1', name: 'ใบสมัครลงทะเบียนผู้ผลิต ผู้ประกอบการ OTOP', type: 'PDF', size: '245 KB', category: 'OTOP', link: 'https://cdd.go.th/otop-register-form' },
-      { id: 'doc_2', name: 'แบบคำขออนุมัติใช้เครื่องหมายสัญลักษณ์ผลิตภัณฑ์ OTOP', type: 'PDF', size: '180 KB', category: 'OTOP', link: 'https://cdd.go.th/otop-logo-request' },
-      { id: 'doc_3', name: 'คู่มือเกณฑ์มาตรฐานการคัดสรรดาวผลิตภัณฑ์ OTOP', type: 'PDF', size: '1.2 MB', category: 'OTOP', link: 'https://cdd.go.th/otop-star-criteria' },
-      { id: 'doc_4', name: 'ใบสมัครสมาชิกกองทุนพัฒนาสตรี (ประเภทบุคคลธรรมดา)', type: 'PDF', size: '190 KB', category: 'กองทุนสตรี', link: 'https://womenfund.cdd.go.th/member-apply' },
-      { id: 'doc_5', name: 'แบบเสนอโครงการขอรับการสนับสนุนเงินกู้ยืมสตรี', type: 'DOCX', size: '85 KB', category: 'กองทุนสตรี', link: 'https://womenfund.cdd.go.th/project-proposal' },
-      { id: 'doc_6', name: 'แบบรายงานผลสำเร็จการดำเนินงานโครงการสตรีประจำไตรมาส', type: 'PDF', size: '310 KB', category: 'กองทุนสตรี', link: 'https://womenfund.cdd.go.th/quarter-report' },
-      { id: 'doc_7', name: 'คำขอจดทะเบียนจัดตั้งกลุ่มออมทรัพย์เพื่อการผลิต', type: 'PDF', size: '215 KB', category: 'องค์กรชุมชน', link: 'https://cdd.go.th/saving-group-setup' },
-      { id: 'doc_8', name: 'แบบฟอร์มจัดตั้งและเสนอชื่อกองทุนแม่ของแผ่นดิน', type: 'PDF', size: '150 KB', category: 'องค์กรชุมชน', link: 'https://cdd.go.th/mother-fund-setup' },
-      { id: 'doc_9', name: 'คู่มือระเบียบปฏิบัติและแนวทางโครงการ กข.คจ.', type: 'PDF', size: '1.8 MB', category: 'องค์กรชุมชน', link: 'https://cdd.go.th/kbkj-manual' }
-    ];
+    docs = [];
     saveToFirebase(DOCUMENTS_KEY, docs);
   } else {
     docs = JSON.parse(docs);
