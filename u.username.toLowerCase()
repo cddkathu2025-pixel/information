@@ -1,0 +1,1 @@
+export function validateUserLogin(username, password) { const users = [ { username: 'executive', password: 'executive123', name: 'พัฒนาการอำเภอกะทู้', role: 'executive' }, { username: 'admin', password: 'admin123', name: 'ผู้ดูแลระบบ (Admin)', role: 'admin' } ]; const match = users.find(u = === username.toLowerCase() 

@@ -173,7 +173,7 @@ class ErrorBoundary extends React.Component {
           </pre>
           <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
             <button 
-              onClick={() => {
+              onClick={async () => {
                 localStorage.removeItem('ecc_districts_db');
                 localStorage.removeItem('ecc_projects_db');
                 localStorage.removeItem('ecc_groups_db');
@@ -199,7 +199,7 @@ class ErrorBoundary extends React.Component {
               🔄 รีเซ็ตข้อมูลดิบระบบกลับเป็นค่าเริ่มต้น
             </button>
             <button 
-              onClick={() => window.location.reload()}
+              onClick={async () => window.location.reload()}
               style={{ 
                 padding: '10px 20px', 
                 backgroundColor: '#94a3b8', 
@@ -460,7 +460,8 @@ function DashboardApp() {
   });
 
   // Reload data from local database
-  const reloadData = () => {
+  const reloadData = async () => {
+    await loadFirebaseData();
     setDistricts(getDistricts());
     setProjects(getProjects());
     setGroups(getGroups());
@@ -519,7 +520,8 @@ function DashboardApp() {
     setModalType('group_delete');
   };
 
-  const handleSubmitGroup = (e) => {
+  const handleSubmitGroup = async (e) => {
+    try {
     e.preventDefault();
     if (!groupFormData.name || !groupFormData.president || !groupFormData.phone || !groupFormData.members) {
       alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
@@ -538,21 +540,28 @@ function DashboardApp() {
     };
 
     if (modalType === 'group_add') {
-      addGroup(payload);
+      await addGroup(payload);
       alert('เพิ่มกลุ่ม/องค์กรสำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'group_edit') {
-      updateGroup(selectedGroup.id, payload);
+      await updateGroup(selectedGroup.id, payload);
       alert('แก้ไขข้อมูลกลุ่ม/องค์กรสำเร็จเรียบร้อยแล้ว!');
     }
 
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteGroupConfirm = () => {
-    deleteGroup(selectedGroup.id);
-    reloadData();
-    setModalType(null);
+  const handleDeleteGroupConfirm = async () => {
+    try {
+    await deleteGroup(selectedGroup.id);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Budget CRUD Handlers
@@ -583,7 +592,8 @@ function DashboardApp() {
     setModalType('budget_edit');
   };
 
-  const handleSaveBudget = (e) => {
+  const handleSaveBudget = async (e) => {
+    try {
     e.preventDefault();
     let updatedBudgets = [...monthlyBudgets];
     const targetVal = parseFloat(budgetFormData.target) || 0;
@@ -617,17 +627,24 @@ function DashboardApp() {
       }
     }
     
-    saveMonthlyBudgets(updatedBudgets);
-    reloadData();
-    setModalType(null);
+    await saveMonthlyBudgets(updatedBudgets);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteBudget = () => {
+  const handleDeleteBudget = async () => {
+    try {
     if (!selectedBudget) return;
     const updatedBudgets = monthlyBudgets.filter(b => !(b.month === selectedBudget.month && b.year === selectedBudget.year));
-    saveMonthlyBudgets(updatedBudgets);
-    reloadData();
-    setModalType(null);
+    await saveMonthlyBudgets(updatedBudgets);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Project CRUD Handlers
@@ -673,7 +690,8 @@ function DashboardApp() {
     setModalType('project_delete');
   };
 
-  const handleSubmitProject = (e) => {
+  const handleSubmitProject = async (e) => {
+    try {
     e.preventDefault();
     if (!projFormData.name || !projFormData.budget || !projFormData.spent || !projFormData.manager) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -695,22 +713,29 @@ function DashboardApp() {
     };
 
     if (modalType === 'project_add') {
-      addProject(payload);
+      await addProject(payload);
       alert('เพิ่มโครงการใหม่สำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'project_edit') {
-      updateProject(selectedProject.id, payload);
+      await updateProject(selectedProject.id, payload);
       alert('แก้ไขข้อมูลโครงการสำเร็จเรียบร้อยแล้ว!');
     }
 
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteProjConfirm = () => {
-    deleteProject(selectedProject.id);
+  const handleDeleteProjConfirm = async () => {
+    try {
+    await deleteProject(selectedProject.id);
     alert('ลบโครงการสำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Report CRUD Handlers
@@ -740,7 +765,8 @@ function DashboardApp() {
     setModalType('report_delete');
   };
 
-  const handleSubmitReport = (e) => {
+  const handleSubmitReport = async (e) => {
+    try {
     e.preventDefault();
     if (!reportFormData.projectName || !reportFormData.month) {
       alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
@@ -755,26 +781,34 @@ function DashboardApp() {
     };
 
     if (modalType === 'report_add') {
-      addReport(payload);
+      await addReport(payload);
       alert('เพิ่มรายการติดตามรายงานสำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'report_edit') {
-      updateReport(selectedReport.id, payload);
+      await updateReport(selectedReport.id, payload);
       alert('แก้ไขข้อมูลติดตามรายงานสำเร็จเรียบร้อยแล้ว!');
     }
 
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteReportConfirm = () => {
-    deleteReport(selectedReport.id);
+  const handleDeleteReportConfirm = async () => {
+    try {
+    await deleteReport(selectedReport.id);
     alert('ลบรายการติดตามรายงานสำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Women Projects CRUD Handlers
-  const handleSubmitWomenProject = (e) => {
+  const handleSubmitWomenProject = async (e) => {
+    try {
     e.preventDefault();
     if (!womenProjForm.name || !womenProjForm.groupsCount || !womenProjForm.paybackRate) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -786,25 +820,33 @@ function DashboardApp() {
       paybackRate: womenProjForm.paybackRate
     };
     if (modalType === 'women_proj_add') {
-      addWomenProject(payload);
+      await addWomenProject(payload);
       alert('เพิ่มโครงการสตรีสำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'women_proj_edit') {
-      updateWomenProject(selectedWomenProject.id, payload);
+      await updateWomenProject(selectedWomenProject.id, payload);
       alert('แก้ไขโครงการสตรีสำเร็จเรียบร้อยแล้ว!');
     }
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteWomenProjectConfirm = () => {
-    deleteWomenProject(selectedWomenProject.id);
+  const handleDeleteWomenProjectConfirm = async () => {
+    try {
+    await deleteWomenProject(selectedWomenProject.id);
     alert('ลบโครงการสตรีสำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Custom Special Menus CRUD Handlers
-  const handleSubmitCustomSpecialMenu = (e) => {
+  const handleSubmitCustomSpecialMenu = async (e) => {
+    try {
     e.preventDefault();
     if (!customSpecialMenuForm.name || !customSpecialMenuForm.content) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -815,25 +857,33 @@ function DashboardApp() {
       content: customSpecialMenuForm.content
     };
     if (modalType === 'custom_menu_add') {
-      addCustomSpecialMenu(payload);
+      await addCustomSpecialMenu(payload);
       alert('เพิ่มรายการเมนูพิเศษใหม่สำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'custom_menu_edit') {
-      updateCustomSpecialMenu(selectedCustomSpecialMenu.id, payload);
+      await updateCustomSpecialMenu(selectedCustomSpecialMenu.id, payload);
       alert('แก้ไขข้อมูลเมนูพิเศษสำเร็จเรียบร้อยแล้ว!');
     }
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteCustomSpecialMenuConfirm = () => {
-    deleteCustomSpecialMenu(selectedCustomSpecialMenu.id);
+  const handleDeleteCustomSpecialMenuConfirm = async () => {
+    try {
+    await deleteCustomSpecialMenu(selectedCustomSpecialMenu.id);
     alert('ลบรายการเมนูพิเศษสำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // AI Questions CRUD Handlers
-  const handleSubmitAiQuestion = (e) => {
+  const handleSubmitAiQuestion = async (e) => {
+    try {
     e.preventDefault();
     if (!aiQuestionForm.label || !aiQuestionForm.query) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -845,25 +895,33 @@ function DashboardApp() {
       answer: aiQuestionForm.answer
     };
     if (modalType === 'ai_question_add') {
-      addAiQuestion(payload);
+      await addAiQuestion(payload);
       alert('เพิ่มคำถามวิเคราะห์ AI สำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'ai_question_edit') {
-      updateAiQuestion(selectedAiQuestion.id, payload);
+      await updateAiQuestion(selectedAiQuestion.id, payload);
       alert('แก้ไขคำถามวิเคราะห์ AI สำเร็จเรียบร้อยแล้ว!');
     }
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteAiQuestionConfirm = () => {
-    deleteAiQuestion(selectedAiQuestion.id);
+  const handleDeleteAiQuestionConfirm = async () => {
+    try {
+    await deleteAiQuestion(selectedAiQuestion.id);
     alert('ลบคำถามวิเคราะห์ AI สำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // OTOP Product CRUD Handlers
-  const handleSubmitOtopProduct = (e) => {
+  const handleSubmitOtopProduct = async (e) => {
+    try {
     e.preventDefault();
     if (!otopProductForm.name || !otopProductForm.sale) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -877,25 +935,33 @@ function DashboardApp() {
       star: parseInt(otopProductForm.star, 10) || 5
     };
     if (modalType === 'otop_product_add') {
-      addOtopProduct(payload);
+      await addOtopProduct(payload);
       alert('เพิ่มสินค้า OTOP สำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'otop_product_edit') {
-      updateOtopProduct(selectedOtopProduct.id, payload);
+      await updateOtopProduct(selectedOtopProduct.id, payload);
       alert('แก้ไขสินค้า OTOP สำเร็จเรียบร้อยแล้ว!');
     }
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteOtopProductConfirm = () => {
-    deleteOtopProduct(selectedOtopProduct.id);
+  const handleDeleteOtopProductConfirm = async () => {
+    try {
+    await deleteOtopProduct(selectedOtopProduct.id);
     alert('ลบสินค้า OTOP สำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Document CRUD Handlers
-  const handleSubmitDocument = (e) => {
+  const handleSubmitDocument = async (e) => {
+    try {
     e.preventDefault();
     if (!documentForm.name || !documentForm.link) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -909,21 +975,28 @@ function DashboardApp() {
       link: documentForm.link
     };
     if (modalType === 'document_add') {
-      addDocument(payload);
+      await addDocument(payload);
       alert('เพิ่มแบบฟอร์ม/เอกสารสำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'document_edit') {
-      updateDocument(selectedDocument.id, payload);
+      await updateDocument(selectedDocument.id, payload);
       alert('แก้ไขข้อมูลสำเร็จเรียบร้อยแล้ว!');
     }
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteDocumentConfirm = () => {
-    deleteDocument(selectedDocument.id);
+  const handleDeleteDocumentConfirm = async () => {
+    try {
+    await deleteDocument(selectedDocument.id);
     alert('ลบแบบฟอร์ม/เอกสารสำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // KPI CRUD Handlers & Form State
@@ -964,7 +1037,8 @@ function DashboardApp() {
     setModalType('kpi_edit');
   };
 
-  const handleSubmitKPI = (e) => {
+  const handleSubmitKPI = async (e) => {
+    try {
     e.preventDefault();
     if (!kpiFormData.name || !kpiFormData.target || !kpiFormData.actual) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -982,22 +1056,29 @@ function DashboardApp() {
     };
 
     if (modalType === 'kpi_add') {
-      addKPI(payload);
+      await addKPI(payload);
       alert('เพิ่มตัวชี้วัดใหม่สำเร็จเรียบร้อยแล้ว!');
     } else if (modalType === 'kpi_edit') {
-      updateKPI(selectedKPI.id, payload);
+      await updateKPI(selectedKPI.id, payload);
       alert('แก้ไขข้อมูลตัวชี้วัดสำเร็จเรียบร้อยแล้ว!');
     }
 
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDeleteKPIConfirm = () => {
-    deleteKPI(selectedKPI.id);
+  const handleDeleteKPIConfirm = async () => {
+    try {
+    await deleteKPI(selectedKPI.id);
     alert('ลบตัวชี้วัดสำเร็จเรียบร้อยแล้ว!');
-    reloadData();
-    setModalType(null);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // District Edit Handlers
@@ -1024,7 +1105,8 @@ function DashboardApp() {
     setModalType('district_edit');
   };
 
-  const handleSubmitDistrictEdit = (e) => {
+  const handleSubmitDistrictEdit = async (e) => {
+    try {
     e.preventDefault();
     const updated = districts.map(d => {
       if (d.name === selectedDistrict.name) {
@@ -1060,9 +1142,12 @@ function DashboardApp() {
       }
       return d;
     });
-    saveDistricts(updated);
-    reloadData();
-    setModalType(null);
+    await saveDistricts(updated);
+    await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Group submenu click helper
@@ -1093,7 +1178,7 @@ function DashboardApp() {
     triggerAiQuery(aiInput);
   };
 
-  const handleResetSystem = () => {
+  const handleResetSystem = async () => {
     if (confirm('ยืนยันที่จะรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าตั้งต้น?')) {
       localStorage.removeItem('ecc_districts_db');
       localStorage.removeItem('ecc_projects_db');
@@ -1107,7 +1192,7 @@ function DashboardApp() {
       localStorage.removeItem('ecc_ai_questions_db');
       localStorage.removeItem('ecc_otop_products_db');
       localStorage.removeItem('ecc_documents_db');
-      reloadData();
+      await reloadData();
       alert('ระบบถูกรีเซ็ตเรียบร้อยแล้ว');
     }
   };
@@ -1292,7 +1377,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'ภาพรวมบริหาร' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('ภาพรวมบริหาร'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('ภาพรวมบริหาร'); setIsAdminMode(false); }}
             >
               <Home size={18} />
               <span className="menu-item-text">หน้าแรกภาพรวมผู้บริหาร</span>
@@ -1302,7 +1387,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'ตัวชี้วัด' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('ตัวชี้วัด'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('ตัวชี้วัด'); setIsAdminMode(false); }}
             >
               <CheckCircle2 size={18} />
               <span className="menu-item-text">ตัวชี้วัด (KPI)</span>
@@ -1312,7 +1397,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'งบประมาณ' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('งบประมาณ'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('งบประมาณ'); setIsAdminMode(false); }}
             >
               <DollarSign size={18} />
               <span className="menu-item-text">งบประมาณและเบิกจ่าย</span>
@@ -1322,7 +1407,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'ข้อมูลพื้นฐาน' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('ข้อมูลพื้นฐาน'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('ข้อมูลพื้นฐาน'); setIsAdminMode(false); }}
             >
               <Users size={18} />
               <span className="menu-item-text">ข้อมูลพื้นฐานประชากร</span>
@@ -1332,7 +1417,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'OTOP' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('OTOP'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('OTOP'); setIsAdminMode(false); }}
             >
               <ShoppingBag size={18} />
               <span className="menu-item-text">แดชบอร์ด OTOP</span>
@@ -1342,7 +1427,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'GIS' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('GIS'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('GIS'); setIsAdminMode(false); }}
             >
               <Map size={18} />
               <span className="menu-item-text">แผนที่สารสนเทศ GIS</span>
@@ -1352,7 +1437,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'ติดตามรายงาน' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('ติดตามรายงาน'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('ติดตามรายงาน'); setIsAdminMode(false); }}
             >
               <FileText size={18} />
               <span className="menu-item-text">📝 ติดตามส่งรายงาน</span>
@@ -1362,7 +1447,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${groupMenuExpanded ? 'expanded' : ''}`}
-              onClick={() => setGroupMenuExpanded(!groupMenuExpanded)}
+              onClick={async () => setGroupMenuExpanded(!groupMenuExpanded)}
             >
               <Users size={18} />
               <span className="menu-item-text">ข้อมูลกลุ่ม/องค์กร</span>
@@ -1374,7 +1459,7 @@ function DashboardApp() {
                   <li 
                     key={type}
                     className={`submenu-item ${activeMenu === type && !isAdminMode ? 'active' : ''}`}
-                    onClick={() => handleSubmenuGroupClick(type)}
+                    onClick={async () => handleSubmenuGroupClick(type)}
                   >
                     {type}
                   </li>
@@ -1386,7 +1471,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'AI' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('AI'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('AI'); setIsAdminMode(false); }}
             >
               <Database size={18} />
               <span className="menu-item-text">ผู้ช่วยวิเคราะห์ AI</span>
@@ -1396,7 +1481,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${specialPortalsOpen ? 'expanded' : ''}`}
-              onClick={() => setSpecialPortalsOpen(!specialPortalsOpen)}
+              onClick={async () => setSpecialPortalsOpen(!specialPortalsOpen)}
             >
               <FileText size={18} />
               <span className="menu-item-text">เมนูพิเศษ พช.</span>
@@ -1404,14 +1489,14 @@ function DashboardApp() {
             </div>
             {specialPortalsOpen && !sidebarCollapsed && (
               <ul className="submenu">
-                <li className={`submenu-item ${activeMenu === 'กองทุนสตรี' && !isAdminMode ? 'active' : ''}`} onClick={() => { setActiveMenu('กองทุนสตรี'); setSpecialTab('women'); setIsAdminMode(false); }}>กองทุนพัฒนาสตรี</li>
-                <li className={`submenu-item ${activeMenu === 'TPMAP' && !isAdminMode ? 'active' : ''}`} onClick={() => { setActiveMenu('TPMAP'); setSpecialTab('tpmap'); setIsAdminMode(false); }}>ระบบชี้เป้า TPMAP</li>
-                <li className={`submenu-item ${activeMenu === 'OnePage' && !isAdminMode ? 'active' : ''}`} onClick={() => { setActiveMenu('OnePage'); setIsAdminMode(false); }}>รายงาน One Page</li>
+                <li className={`submenu-item ${activeMenu === 'กองทุนสตรี' && !isAdminMode ? 'active' : ''}`} onClick={async () => { setActiveMenu('กองทุนสตรี'); setSpecialTab('women'); setIsAdminMode(false); }}>กองทุนพัฒนาสตรี</li>
+                <li className={`submenu-item ${activeMenu === 'TPMAP' && !isAdminMode ? 'active' : ''}`} onClick={async () => { setActiveMenu('TPMAP'); setSpecialTab('tpmap'); setIsAdminMode(false); }}>ระบบชี้เป้า TPMAP</li>
+                <li className={`submenu-item ${activeMenu === 'OnePage' && !isAdminMode ? 'active' : ''}`} onClick={async () => { setActiveMenu('OnePage'); setIsAdminMode(false); }}>รายงาน One Page</li>
                 {customSpecialMenus.map(m => (
                   <li 
                     key={m.id} 
                     className={`submenu-item ${activeMenu === m.name && !isAdminMode ? 'active' : ''}`} 
-                    onClick={() => { setActiveMenu(m.name); setIsAdminMode(false); }}
+                    onClick={async () => { setActiveMenu(m.name); setIsAdminMode(false); }}
                   >
                     ✨ {m.name}
                   </li>
@@ -1423,7 +1508,7 @@ function DashboardApp() {
           <li className="menu-item-container">
             <div 
               className={`menu-item ${activeMenu === 'ดาวน์โหลดเอกสาร' && !isAdminMode ? 'active' : ''}`}
-              onClick={() => { setActiveMenu('ดาวน์โหลดเอกสาร'); setIsAdminMode(false); }}
+              onClick={async () => { setActiveMenu('ดาวน์โหลดเอกสาร'); setIsAdminMode(false); }}
             >
               <Download size={18} />
               <span className="menu-item-text">ดาวน์โหลดแบบฟอร์ม/เอกสาร</span>
@@ -1436,7 +1521,7 @@ function DashboardApp() {
               <div 
                 className={`menu-item ${isAdminMode ? 'active' : ''}`}
                 style={{ backgroundColor: isAdminMode ? 'var(--warning)' : 'transparent', color: '#fff' }}
-                onClick={() => { setIsAdminMode(true); setActiveMenu('AdminPanel'); }}
+                onClick={async () => { setIsAdminMode(true); setActiveMenu('AdminPanel'); }}
               >
                 <Settings size={18} />
                 <span className="menu-item-text" style={{ fontWeight: '700' }}>⚙️ ระบบจัดการข้อมูล (Admin)</span>
@@ -1454,7 +1539,7 @@ function DashboardApp() {
           <div className="header-left">
             <button 
               className="toggle-sidebar-btn" 
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              onClick={async () => setSidebarCollapsed(!sidebarCollapsed)}
             >
               <Menu size={20} />
             </button>
@@ -1472,7 +1557,7 @@ function DashboardApp() {
             {/* Quick role toggle */}
             {currentUser?.role === 'admin' && (
               <button 
-                onClick={() => {
+                onClick={async () => {
                   setIsAdminMode(!isAdminMode);
                   setActiveMenu(isAdminMode ? 'ภาพรวมบริหาร' : 'AdminPanel');
                 }}
@@ -1532,37 +1617,37 @@ function DashboardApp() {
           {isAdminMode && activeMenu === 'AdminPanel' && (
             <div className="dashboard-card">
               <div className="page-tabs-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                <button className={`tab-btn ${adminTab === 'groups' ? 'active' : ''}`} onClick={() => setAdminTab('groups')}>
+                <button className={`tab-btn ${adminTab === 'groups' ? 'active' : ''}`} onClick={async () => setAdminTab('groups')}>
                   👥 จัดการกลุ่ม/องค์กร ({groups.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'projects' ? 'active' : ''}`} onClick={() => setAdminTab('projects')}>
+                <button className={`tab-btn ${adminTab === 'projects' ? 'active' : ''}`} onClick={async () => setAdminTab('projects')}>
                   📂 จัดการโครงการติดตาม ({projects.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'kpis' ? 'active' : ''}`} onClick={() => setAdminTab('kpis')}>
+                <button className={`tab-btn ${adminTab === 'kpis' ? 'active' : ''}`} onClick={async () => setAdminTab('kpis')}>
                   🎯 จัดการตัวชี้วัด ({kpis.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'group_types' ? 'active' : ''}`} onClick={() => setAdminTab('group_types')}>
+                <button className={`tab-btn ${adminTab === 'group_types' ? 'active' : ''}`} onClick={async () => setAdminTab('group_types')}>
                   🏷️ จัดการประเภทกลุ่ม ({groupTypes.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'districts' ? 'active' : ''}`} onClick={() => setAdminTab('districts')}>
+                <button className={`tab-btn ${adminTab === 'districts' ? 'active' : ''}`} onClick={async () => setAdminTab('districts')}>
                   📍 ปรับปรุงสถิติรายตำบล (3)
                 </button>
-                <button className={`tab-btn ${adminTab === 'reports' ? 'active' : ''}`} onClick={() => setAdminTab('reports')}>
+                <button className={`tab-btn ${adminTab === 'reports' ? 'active' : ''}`} onClick={async () => setAdminTab('reports')}>
                   📝 ติดตามส่งรายงาน ({reports.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'special_portals' ? 'active' : ''}`} onClick={() => { setAdminTab('special_portals'); setWomenStatsForm(getWomenStats()); setTpmapStatsForm(getTpmapStats()); }}>
+                <button className={`tab-btn ${adminTab === 'special_portals' ? 'active' : ''}`} onClick={async () => { setAdminTab('special_portals'); setWomenStatsForm(getWomenStats()); setTpmapStatsForm(getTpmapStats()); }}>
                   ⚙️ จัดการเมนูพิเศษ พช.
                 </button>
-                <button className={`tab-btn ${adminTab === 'ai_questions' ? 'active' : ''}`} onClick={() => setAdminTab('ai_questions')}>
+                <button className={`tab-btn ${adminTab === 'ai_questions' ? 'active' : ''}`} onClick={async () => setAdminTab('ai_questions')}>
                   🤖 จัดการคำถามวิเคราะห์ AI ({aiQuestions.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'otop_products' ? 'active' : ''}`} onClick={() => setAdminTab('otop_products')}>
+                <button className={`tab-btn ${adminTab === 'otop_products' ? 'active' : ''}`} onClick={async () => setAdminTab('otop_products')}>
                   🛍️ จัดการสินค้า OTOP ({otopProducts.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'documents' ? 'active' : ''}`} onClick={() => setAdminTab('documents')}>
+                <button className={`tab-btn ${adminTab === 'documents' ? 'active' : ''}`} onClick={async () => setAdminTab('documents')}>
                   📄 จัดการแบบฟอร์ม/เอกสาร ({documents.length})
                 </button>
-                <button className={`tab-btn ${adminTab === 'budgets' ? 'active' : ''}`} onClick={() => setAdminTab('budgets')}>
+                <button className={`tab-btn ${adminTab === 'budgets' ? 'active' : ''}`} onClick={async () => setAdminTab('budgets')}>
                   💰 จัดการงบประมาณและเบิกจ่าย ({monthlyBudgets.length})
                 </button>
               </div>
@@ -1625,7 +1710,7 @@ function DashboardApp() {
                       />
                     </div>
                     
-                    <button className="btn-search" onClick={() => setGroupSearchTrigger(groupSearchQuery)}>ค้นหา</button>
+                    <button className="btn-search" onClick={async () => setGroupSearchTrigger(groupSearchQuery)}>ค้นหา</button>
                     <button className="btn-add-new" onClick={handleOpenAddGroup}>
                       <Plus size={16} /> เพิ่มกลุ่ม/องค์กรใหม่
                     </button>
@@ -1666,9 +1751,9 @@ function DashboardApp() {
                               </td>
                               <td>
                                 <div className="action-buttons">
-                                  <button className="btn-action view" onClick={() => handleOpenViewGroup(g)}><Eye size={12} /></button>
-                                  <button className="btn-action edit" onClick={() => handleOpenEditGroup(g)}><Edit2 size={12} /></button>
-                                  <button className="btn-action delete" onClick={() => handleOpenDeleteGroup(g)}><Trash2 size={12} /></button>
+                                  <button className="btn-action view" onClick={async () => handleOpenViewGroup(g)}><Eye size={12} /></button>
+                                  <button className="btn-action edit" onClick={async () => handleOpenEditGroup(g)}><Edit2 size={12} /></button>
+                                  <button className="btn-action delete" onClick={async () => handleOpenDeleteGroup(g)}><Trash2 size={12} /></button>
                                 </div>
                               </td>
                             </tr>
@@ -1688,10 +1773,10 @@ function DashboardApp() {
                       แสดง {filteredGroups.length === 0 ? 0 : groupsFirstIdx + 1} ถึง {Math.min(groupsLastIdx, filteredGroups.length)} จาก {filteredGroups.length} รายการ
                     </span>
                     <div className="pagination-buttons">
-                      <button className={`btn-page ${groupsCurrentPage === 1 ? 'disabled' : ''}`} disabled={groupsCurrentPage === 1} onClick={() => setGroupsCurrentPage(groupsCurrentPage - 1)}>ก่อนหน้า</button>
+                      <button className={`btn-page ${groupsCurrentPage === 1 ? 'disabled' : ''}`} disabled={groupsCurrentPage === 1} onClick={async () => setGroupsCurrentPage(groupsCurrentPage - 1)}>ก่อนหน้า</button>
                       <button className="btn-page active">{groupsCurrentPage}</button>
                       <span style={{ fontSize: '13px', margin: '0 8px', color: 'var(--text-muted)' }}>/ ทั้งหมด {totalGroupPages} หน้า</span>
-                      <button className={`btn-page ${groupsCurrentPage === totalGroupPages ? 'disabled' : ''}`} disabled={groupsCurrentPage === totalGroupPages} onClick={() => setGroupsCurrentPage(groupsCurrentPage + 1)}>ถัดไป</button>
+                      <button className={`btn-page ${groupsCurrentPage === totalGroupPages ? 'disabled' : ''}`} disabled={groupsCurrentPage === totalGroupPages} onClick={async () => setGroupsCurrentPage(groupsCurrentPage + 1)}>ถัดไป</button>
                     </div>
                   </div>
                 </div>
@@ -1769,8 +1854,8 @@ function DashboardApp() {
                             </td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                <button className="btn-action edit" onClick={() => handleOpenEditProject(p)}><Edit2 size={12} /></button>
-                                <button className="btn-action delete" onClick={() => handleOpenDeleteProject(p)}><Trash2 size={12} /></button>
+                                <button className="btn-action edit" onClick={async () => handleOpenEditProject(p)}><Edit2 size={12} /></button>
+                                <button className="btn-action delete" onClick={async () => handleOpenDeleteProject(p)}><Trash2 size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1817,7 +1902,7 @@ function DashboardApp() {
                               <button 
                                 className="btn-action edit" 
                                 title="ปรับสถิติอำเภอ"
-                                onClick={() => handleOpenEditDistrict(d)}
+                                onClick={async () => handleOpenEditDistrict(d)}
                               >
                                 <Edit2 size={12} />
                               </button>
@@ -1871,8 +1956,8 @@ function DashboardApp() {
                             </td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                <button className="btn-action edit" onClick={() => handleOpenEditKPI(k)}><Edit2 size={12} /></button>
-                                <button className="btn-action delete" onClick={() => { setSelectedKPI(k); setModalType('kpi_delete'); }}><Trash2 size={12} /></button>
+                                <button className="btn-action edit" onClick={async () => handleOpenEditKPI(k)}><Edit2 size={12} /></button>
+                                <button className="btn-action delete" onClick={async () => { setSelectedKPI(k); setModalType('kpi_delete'); }}><Trash2 size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1898,14 +1983,14 @@ function DashboardApp() {
                       />
                       <button 
                         className="btn-add-new" 
-                        onClick={() => {
+                        onClick={async () => {
                           const input = document.getElementById('newGroupTypeInput');
                           const val = input.value.trim();
                           if (val) {
                             addGroupType(val);
                             alert('เพิ่มประเภทกลุ่มสำเร็จเรียบร้อยแล้ว!');
                             input.value = '';
-                            reloadData();
+                            await reloadData();
                           } else {
                             alert('กรุณากรอกชื่อประเภทกลุ่ม');
                           }
@@ -1932,11 +2017,11 @@ function DashboardApp() {
                             <td style={{ textAlign: 'center' }}>
                               <button 
                                 className="btn-action delete"
-                                onClick={() => {
+                                onClick={async () => {
                                   if (confirm(`ยืนยันการลบประเภทกลุ่ม "${type}"? ข้อมูลกลุ่มที่เป็นประเภทนี้จะไม่แสดงผล`)) {
                                     deleteGroupType(type);
                                     alert('ลบประเภทกลุ่มสำเร็จเรียบร้อยแล้ว!');
-                                    reloadData();
+                                    await reloadData();
                                   }
                                 }}
                               >
@@ -1990,8 +2075,8 @@ function DashboardApp() {
                               <td>{r.updatedAt || '-'}</td>
                               <td>
                                 <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                  <button className="btn-action edit" onClick={() => handleOpenEditReport(r)}><Edit2 size={12} /></button>
-                                  <button className="btn-action delete" onClick={() => handleOpenDeleteReport(r)}><Trash2 size={12} /></button>
+                                  <button className="btn-action edit" onClick={async () => handleOpenEditReport(r)}><Edit2 size={12} /></button>
+                                  <button className="btn-action delete" onClick={async () => handleOpenDeleteReport(r)}><Trash2 size={12} /></button>
                                 </div>
                               </td>
                             </tr>
@@ -2032,13 +2117,13 @@ function DashboardApp() {
                         />
                       </div>
                     </div>
-                    <button className="btn-add-new" style={{ width: '100%', marginBottom: '20px', padding: '8px 12px', display: 'flex', justifyContent: 'center' }} onClick={() => { saveWomenStats(womenStatsForm); reloadData(); alert('บันทึกสถิติกองทุนพัฒนาบทบาทสตรีสำเร็จ!'); }}>
+                    <button className="btn-add-new" style={{ width: '100%', marginBottom: '20px', padding: '8px 12px', display: 'flex', justifyContent: 'center' }} onClick={async () => { await saveWomenStats(womenStatsForm); await reloadData(); alert('บันทึกสถิติกองทุนพัฒนาบทบาทสตรีสำเร็จ!'); }}>
                       💾 บันทึกสถิติกองทุนสตรี
                     </button>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '700' }}>📋 โครงการสตรี</h4>
-                      <button className="btn-add-new" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => { setWomenProjForm({ name: '', groupsCount: '', paybackRate: '' }); setModalType('women_proj_add'); }}>
+                      <button className="btn-add-new" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={async () => { setWomenProjForm({ name: '', groupsCount: '', paybackRate: '' }); setModalType('women_proj_add'); }}>
                         <Plus size={12} /> เพิ่มโครงการสตรี
                       </button>
                     </div>
@@ -2060,8 +2145,8 @@ function DashboardApp() {
                               <td style={{ color: 'var(--success)', fontWeight: '700', fontSize: '12px' }}>{wp.paybackRate}</td>
                               <td>
                                 <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                  <button className="btn-action edit" onClick={() => { setSelectedWomenProject(wp); setWomenProjForm({ name: wp.name, groupsCount: wp.groupsCount, paybackRate: wp.paybackRate }); setModalType('women_proj_edit'); }}><Edit2 size={12} /></button>
-                                  <button className="btn-action delete" onClick={() => { setSelectedWomenProject(wp); setModalType('women_proj_delete'); }}><Trash2 size={12} /></button>
+                                  <button className="btn-action edit" onClick={async () => { setSelectedWomenProject(wp); setWomenProjForm({ name: wp.name, groupsCount: wp.groupsCount, paybackRate: wp.paybackRate }); setModalType('women_proj_edit'); }}><Edit2 size={12} /></button>
+                                  <button className="btn-action delete" onClick={async () => { setSelectedWomenProject(wp); setModalType('women_proj_delete'); }}><Trash2 size={12} /></button>
                                 </div>
                               </td>
                             </tr>
@@ -2110,7 +2195,7 @@ function DashboardApp() {
                         </span>
                       </div>
                     </div>
-                    <button className="btn-add-new" style={{ width: '100%', padding: '8px 12px', display: 'flex', justifyContent: 'center' }} onClick={() => { saveTpmapStats(tpmapStatsForm); reloadData(); alert('บันทึกสถิติครัวเรือน TPMAP สำเร็จ!'); }}>
+                    <button className="btn-add-new" style={{ width: '100%', padding: '8px 12px', display: 'flex', justifyContent: 'center' }} onClick={async () => { await saveTpmapStats(tpmapStatsForm); await reloadData(); alert('บันทึกสถิติครัวเรือน TPMAP สำเร็จ!'); }}>
                       💾 บันทึกสถิติ TPMAP
                     </button>
                   </div>
@@ -2122,7 +2207,7 @@ function DashboardApp() {
                   <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     ✨ จัดการรายการเมนูพิเศษเพิ่มเติม (Custom Special Menus)
                   </h3>
-                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => { setCustomSpecialMenuForm({ name: '', content: '' }); setModalType('custom_menu_add'); }}>
+                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={async () => { setCustomSpecialMenuForm({ name: '', content: '' }); setModalType('custom_menu_add'); }}>
                     <Plus size={12} /> เพิ่มรายการเมนูพิเศษใหม่
                   </button>
                 </div>
@@ -2148,8 +2233,8 @@ function DashboardApp() {
                             </td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                <button className="btn-action edit" title="แก้ไข" onClick={() => { setSelectedCustomSpecialMenu(cm); setCustomSpecialMenuForm({ name: cm.name, content: cm.content }); setModalType('custom_menu_edit'); }}><Edit2 size={12} /></button>
-                                <button className="btn-action delete" title="ลบ" onClick={() => { setSelectedCustomSpecialMenu(cm); setModalType('custom_menu_delete'); }}><Trash2 size={12} /></button>
+                                <button className="btn-action edit" title="แก้ไข" onClick={async () => { setSelectedCustomSpecialMenu(cm); setCustomSpecialMenuForm({ name: cm.name, content: cm.content }); setModalType('custom_menu_edit'); }}><Edit2 size={12} /></button>
+                                <button className="btn-action delete" title="ลบ" onClick={async () => { setSelectedCustomSpecialMenu(cm); setModalType('custom_menu_delete'); }}><Trash2 size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -2174,7 +2259,7 @@ function DashboardApp() {
                   <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     🤖 จัดการคำถามวิเคราะห์ข้อมูลด่วนของ AI
                   </h3>
-                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => { setAiQuestionForm({ label: '', query: '', answer: '' }); setModalType('ai_question_add'); }}>
+                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={async () => { setAiQuestionForm({ label: '', query: '', answer: '' }); setModalType('ai_question_add'); }}>
                     <Plus size={12} /> เพิ่มคำถามวิเคราะห์ด่วนใหม่
                   </button>
                 </div>
@@ -2202,8 +2287,8 @@ function DashboardApp() {
                             </td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                <button className="btn-action edit" title="แก้ไข" onClick={() => { setSelectedAiQuestion(q); setAiQuestionForm({ label: q.label, query: q.query, answer: q.answer || '' }); setModalType('ai_question_edit'); }}><Edit2 size={12} /></button>
-                                <button className="btn-action delete" title="ลบ" onClick={() => { setSelectedAiQuestion(q); setModalType('ai_question_delete'); }}><Trash2 size={12} /></button>
+                                <button className="btn-action edit" title="แก้ไข" onClick={async () => { setSelectedAiQuestion(q); setAiQuestionForm({ label: q.label, query: q.query, answer: q.answer || '' }); setModalType('ai_question_edit'); }}><Edit2 size={12} /></button>
+                                <button className="btn-action delete" title="ลบ" onClick={async () => { setSelectedAiQuestion(q); setModalType('ai_question_delete'); }}><Trash2 size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -2228,7 +2313,7 @@ function DashboardApp() {
                   <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     🛍️ จัดการรายการสินค้า OTOP ยอดนิยม
                   </h3>
-                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => { setOtopProductForm({ name: '', type: 'อาหาร', district: 'ตำบลกะทู้', sale: '', star: 5 }); setModalType('otop_product_add'); }}>
+                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={async () => { setOtopProductForm({ name: '', type: 'อาหาร', district: 'ตำบลกะทู้', sale: '', star: 5 }); setModalType('otop_product_add'); }}>
                     <Plus size={12} /> เพิ่มสินค้า OTOP ใหม่
                   </button>
                 </div>
@@ -2324,8 +2409,8 @@ function DashboardApp() {
                             <td style={{ color: 'var(--warning)', letterSpacing: '2px' }}>{'★'.repeat(p.star || 5)}</td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                <button className="btn-action edit" title="แก้ไข" onClick={() => { setSelectedOtopProduct(p); setOtopProductForm({ name: p.name, type: p.type || 'อาหาร', district: p.district || 'ตำบลกะทู้', sale: p.sale, star: p.star || 5 }); setModalType('otop_product_edit'); }}><Edit2 size={12} /></button>
-                                <button className="btn-action delete" title="ลบ" onClick={() => { setSelectedOtopProduct(p); setModalType('otop_product_delete'); }}><Trash2 size={12} /></button>
+                                <button className="btn-action edit" title="แก้ไข" onClick={async () => { setSelectedOtopProduct(p); setOtopProductForm({ name: p.name, type: p.type || 'อาหาร', district: p.district || 'ตำบลกะทู้', sale: p.sale, star: p.star || 5 }); setModalType('otop_product_edit'); }}><Edit2 size={12} /></button>
+                                <button className="btn-action delete" title="ลบ" onClick={async () => { setSelectedOtopProduct(p); setModalType('otop_product_delete'); }}><Trash2 size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -2346,7 +2431,7 @@ function DashboardApp() {
                   <h3 style={{ fontSize: '15px', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     📄 จัดการแบบฟอร์ม / เอกสารดาวน์โหลด
                   </h3>
-                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => { setDocumentForm({ name: '', category: 'OTOP', type: 'PDF', size: '100 KB', link: '' }); setModalType('document_add'); }}>
+                  <button className="btn-add-new" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={async () => { setDocumentForm({ name: '', category: 'OTOP', type: 'PDF', size: '100 KB', link: '' }); setModalType('document_add'); }}>
                     <Plus size={12} /> เพิ่มแบบฟอร์ม/เอกสารใหม่
                   </button>
                 </div>
@@ -2382,8 +2467,8 @@ function DashboardApp() {
                             </td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                                <button className="btn-action edit" title="แก้ไข" onClick={() => { setSelectedDocument(d); setDocumentForm({ name: d.name, category: d.category || 'OTOP', type: d.type || 'PDF', size: d.size || '100 KB', link: d.link || '' }); setModalType('document_edit'); }}><Edit2 size={12} /></button>
-                                <button className="btn-action delete" title="ลบ" onClick={() => { setSelectedDocument(d); setModalType('document_delete'); }}><Trash2 size={12} /></button>
+                                <button className="btn-action edit" title="แก้ไข" onClick={async () => { setSelectedDocument(d); setDocumentForm({ name: d.name, category: d.category || 'OTOP', type: d.type || 'PDF', size: d.size || '100 KB', link: d.link || '' }); setModalType('document_edit'); }}><Edit2 size={12} /></button>
+                                <button className="btn-action delete" title="ลบ" onClick={async () => { setSelectedDocument(d); setModalType('document_delete'); }}><Trash2 size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -2437,8 +2522,8 @@ function DashboardApp() {
                         </td>
                         <td>
                           <div className="action-buttons" style={{ justifyContent: 'center' }}>
-                            <button className="btn-action edit" onClick={() => handleOpenEditBudget(b)}><Edit2 size={12} /></button>
-                            <button className="btn-action delete" onClick={() => { setSelectedBudget(b); setModalType('budget_delete'); }}><Trash2 size={12} /></button>
+                            <button className="btn-action edit" onClick={async () => handleOpenEditBudget(b)}><Edit2 size={12} /></button>
+                            <button className="btn-action delete" onClick={async () => { setSelectedBudget(b); setModalType('budget_delete'); }}><Trash2 size={12} /></button>
                           </div>
                         </td>
                       </tr>
@@ -2674,8 +2759,8 @@ function DashboardApp() {
               {activeMenu === 'ตัวชี้วัด' && (
                 <div className="dashboard-card">
                   <div className="page-tabs-bar">
-                    <button className={`tab-btn ${kpiTab === 'overall' ? 'active' : ''}`} onClick={() => setKpiTab('overall')}>ตัวชี้วัดรวมอำเภอกะทู้</button>
-                    <button className={`tab-btn ${kpiTab === 'ranking' ? 'active' : ''}`} onClick={() => setKpiTab('ranking')}>จัดลำดับผลสัมฤทธิ์ตำบล</button>
+                    <button className={`tab-btn ${kpiTab === 'overall' ? 'active' : ''}`} onClick={async () => setKpiTab('overall')}>ตัวชี้วัดรวมอำเภอกะทู้</button>
+                    <button className={`tab-btn ${kpiTab === 'ranking' ? 'active' : ''}`} onClick={async () => setKpiTab('ranking')}>จัดลำดับผลสัมฤทธิ์ตำบล</button>
                   </div>
                   {kpiTab === 'overall' && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginTop: '10px' }}>
@@ -2756,8 +2841,8 @@ function DashboardApp() {
               {activeMenu === 'งบประมาณ' && (
                 <div className="dashboard-card">
                   <div className="page-tabs-bar">
-                    <button className={`tab-btn ${budgetTab === 'financial' ? 'active' : ''}`} onClick={() => setBudgetTab('financial')}>สรุปการเงินอำเภอกะทู้</button>
-                    <button className={`tab-btn ${budgetTab === 'monthly' ? 'active' : ''}`} onClick={() => setBudgetTab('monthly')}>เบิกจ่ายเทียบเป้าสะสม</button>
+                    <button className={`tab-btn ${budgetTab === 'financial' ? 'active' : ''}`} onClick={async () => setBudgetTab('financial')}>สรุปการเงินอำเภอกะทู้</button>
+                    <button className={`tab-btn ${budgetTab === 'monthly' ? 'active' : ''}`} onClick={async () => setBudgetTab('monthly')}>เบิกจ่ายเทียบเป้าสะสม</button>
                   </div>
                   {budgetTab === 'financial' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
@@ -2842,8 +2927,8 @@ function DashboardApp() {
               {activeMenu === 'ข้อมูลพื้นฐาน' && (
                 <div className="dashboard-card">
                   <div className="page-tabs-bar">
-                    <button className={`tab-btn ${basicInfoTab === 'demographics' ? 'active' : ''}`} onClick={() => setBasicInfoTab('demographics')}>กลุ่มประชากรเปราะบาง</button>
-                    <button className={`tab-btn ${basicInfoTab === 'economy' ? 'active' : ''}`} onClick={() => setBasicInfoTab('economy')}>เศรษฐกิจและรายได้เฉลี่ย</button>
+                    <button className={`tab-btn ${basicInfoTab === 'demographics' ? 'active' : ''}`} onClick={async () => setBasicInfoTab('demographics')}>กลุ่มประชากรเปราะบาง</button>
+                    <button className={`tab-btn ${basicInfoTab === 'economy' ? 'active' : ''}`} onClick={async () => setBasicInfoTab('economy')}>เศรษฐกิจและรายได้เฉลี่ย</button>
                   </div>
                   {basicInfoTab === 'demographics' && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
@@ -3147,7 +3232,7 @@ function DashboardApp() {
                             key={idx}
                             d={p.d}
                             className={`map-district-path ${selectedGisDistrict === p.name ? 'selected' : ''}`}
-                            onClick={() => setSelectedGisDistrict(p.name)}
+                            onClick={async () => setSelectedGisDistrict(p.name)}
                           />
                         ))}
                       </svg>
@@ -3200,7 +3285,7 @@ function DashboardApp() {
                         onKeyDown={e => { if (e.key === 'Enter') setGroupSearchTrigger(groupSearchQuery); }}
                       />
                     </div>
-                    <button className="btn-search" onClick={() => setGroupSearchTrigger(groupSearchQuery)}>ค้นหา</button>
+                    <button className="btn-search" onClick={async () => setGroupSearchTrigger(groupSearchQuery)}>ค้นหา</button>
                   </div>
 
                   <div className="data-table-wrapper" style={{ marginTop: '12px' }}>
@@ -3239,9 +3324,9 @@ function DashboardApp() {
                   <div className="pagination-footer">
                     <span>แสดง {groupsFirstIdx + 1} ถึง {Math.min(groupsLastIdx, filteredGroups.length)} จาก {filteredGroups.length} รายการ</span>
                     <div className="pagination-buttons">
-                      <button className="btn-page" onClick={() => setGroupsCurrentPage(prev => Math.max(1, prev-1))}>ก่อนหน้า</button>
+                      <button className="btn-page" onClick={async () => setGroupsCurrentPage(prev => Math.max(1, prev-1))}>ก่อนหน้า</button>
                       <button className="btn-page active">{groupsCurrentPage}</button>
-                      <button className="btn-page" onClick={() => setGroupsCurrentPage(prev => Math.min(totalGroupPages, prev+1))}>ถัดไป</button>
+                      <button className="btn-page" onClick={async () => setGroupsCurrentPage(prev => Math.min(totalGroupPages, prev+1))}>ถัดไป</button>
                     </div>
                   </div>
                 </div>
@@ -3254,7 +3339,7 @@ function DashboardApp() {
                     <span className="ai-sidebar-title">🤖 คำถามวิเคราะห์ข้อมูลด่วน</span>
                     {aiQuestions.length > 0 ? (
                       aiQuestions.map(q => (
-                        <button key={q.id} className="ai-quick-btn" onClick={() => triggerAiQuery(q.query)}>
+                        <button key={q.id} className="ai-quick-btn" onClick={async () => triggerAiQuery(q.query)}>
                           {q.label}
                         </button>
                       ))
@@ -3290,8 +3375,8 @@ function DashboardApp() {
               {(activeMenu === 'กองทุนสตรี' || activeMenu === 'TPMAP') && (
                 <div className="dashboard-card">
                   <div className="page-tabs-bar">
-                    <button className={`tab-btn ${specialTab === 'women' ? 'active' : ''}`} onClick={() => setSpecialTab('women')}>กองทุนพัฒนาบทบาทสตรี</button>
-                    <button className={`tab-btn ${specialTab === 'tpmap' ? 'active' : ''}`} onClick={() => setSpecialTab('tpmap')}>ระบบคนจนชี้เป้า TPMAP</button>
+                    <button className={`tab-btn ${specialTab === 'women' ? 'active' : ''}`} onClick={async () => setSpecialTab('women')}>กองทุนพัฒนาบทบาทสตรี</button>
+                    <button className={`tab-btn ${specialTab === 'tpmap' ? 'active' : ''}`} onClick={async () => setSpecialTab('tpmap')}>ระบบคนจนชี้เป้า TPMAP</button>
                   </div>
                   {specialTab === 'women' && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
@@ -3351,7 +3436,7 @@ function DashboardApp() {
               {/* PAGE 10: ONE PAGE */}
               {activeMenu === 'OnePage' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <button className="btn-print-report" onClick={() => window.print()}><Printer size={16} /> สั่งพิมพ์รายงาน One Page PDF</button>
+                  <button className="btn-print-report" onClick={async () => window.print()}><Printer size={16} /> สั่งพิมพ์รายงาน One Page PDF</button>
                   <div className="one-page-report-container">
                     <div className="report-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                       <img src="/logo.png" alt="พช. Logo" style={{ width: '60px', height: '60px', objectFit: 'contain', marginBottom: '8px' }} />
@@ -3626,7 +3711,7 @@ function DashboardApp() {
           <div className="modal-content">
             <div className="modal-header">
               <h3 className="modal-title"><Info size={16} /> รายละเอียดกลุ่มพัฒนารายอำเภอ</h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <div className="modal-body">
               <div className="details-list">
@@ -3640,7 +3725,7 @@ function DashboardApp() {
                 <div className="details-row"><span className="details-label">สถานะติดตาม:</span><span className="details-val"><span className={`row-status-badge ${selectedGroup.status==='ปกติ'?'normal':selectedGroup.status==='ติดตาม'?'tracking':'danger'}`}>{selectedGroup.status}</span></span></div>
               </div>
             </div>
-            <div className="modal-footer"><button className="btn-cancel" onClick={() => setModalType(null)}>ปิด</button></div>
+            <div className="modal-footer"><button className="btn-cancel" onClick={async () => setModalType(null)}>ปิด</button></div>
           </div>
         </div>
       )}
@@ -3654,7 +3739,7 @@ function DashboardApp() {
                 {modalType === 'group_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'group_add' ? 'เพิ่มกลุ่ม/องค์กรใหม่' : 'แก้ไขข้อมูลกลุ่ม/องค์กร'}
               </h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitGroup}>
               <div className="modal-body">
@@ -3668,14 +3753,14 @@ function DashboardApp() {
                     <select 
                       className="form-input" 
                       value={groupFormData.type} 
-                      onChange={e => {
+                      onChange={async e => {
                         const val = e.target.value;
                         if (val === '__ADD_NEW__') {
                           const newType = prompt('กรุณากรอกชื่อประเภทกลุ่มใหม่:');
                           const trimmed = newType ? newType.trim() : '';
                           if (trimmed) {
-                            addGroupType(trimmed);
-                            reloadData();
+                            await addGroupType(trimmed);
+                            await reloadData();
                             setGroupFormData({...groupFormData, type: trimmed});
                           }
                         } else {
@@ -3722,7 +3807,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกกลุ่มข้อมูล</button>
               </div>
             </form>
@@ -3740,7 +3825,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบข้อมูลกลุ่ม **{selectedGroup.name}** ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteGroupConfirm}>ลบกลุ่ม</button>
             </div>
           </div>
@@ -3753,7 +3838,7 @@ function DashboardApp() {
           <div className="modal-content">
             <div className="modal-header">
               <h3 className="modal-title"><Info size={16} /> รายละเอียดโครงการ</h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <img src={selectedProject.image} alt={selectedProject.name} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '6px' }} />
@@ -3768,7 +3853,7 @@ function DashboardApp() {
                 <div className="details-row"><span className="details-label">สถานะ:</span><span className="details-val">{selectedProject.status}</span></div>
               </div>
             </div>
-            <div className="modal-footer"><button className="btn-cancel" onClick={() => setModalType(null)}>ปิด</button></div>
+            <div className="modal-footer"><button className="btn-cancel" onClick={async () => setModalType(null)}>ปิด</button></div>
           </div>
         </div>
       )}
@@ -3782,7 +3867,7 @@ function DashboardApp() {
                 {modalType === 'budget_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'budget_add' ? 'เพิ่มข้อมูลงบประมาณ' : 'แก้ไขข้อมูลงบประมาณ'}
               </h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={20} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={20} /></button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSaveBudget} className="admin-form">
@@ -3846,7 +3931,7 @@ function DashboardApp() {
                   </select>
                 </div>
                 <div className="modal-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                  <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                   <button type="submit" className="btn-save">บันทึกข้อมูล</button>
                 </div>
               </form>
@@ -3867,7 +3952,7 @@ function DashboardApp() {
               <p style={{ color: '#64748b', fontSize: '13px', marginTop: '10px' }}>การกระทำนี้ไม่สามารถกู้คืนได้</p>
             </div>
             <div className="modal-actions" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-save" style={{ backgroundColor: 'var(--danger)' }} onClick={handleDeleteBudget}>ลบข้อมูล</button>
             </div>
           </div>
@@ -3883,7 +3968,7 @@ function DashboardApp() {
                 {modalType === 'project_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'project_add' ? 'เพิ่มโครงการติดตามใหม่' : 'แก้ไขข้อมูลโครงการ'}
               </h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitProject}>
               <div className="modal-body">
@@ -3941,7 +4026,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลโครงการ</button>
               </div>
             </form>
@@ -3959,7 +4044,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณแน่ใจว่าต้องการลบโครงการ **{selectedProject.name}** หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteProjConfirm}>ลบโครงการ</button>
             </div>
           </div>
@@ -3974,7 +4059,7 @@ function DashboardApp() {
               <h3 className="modal-title">
                 <Settings size={16} /> ปรับสถิติข้อมูลพื้นฐาน: {selectedDistrict.name}
               </h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitDistrictEdit}>
               <div className="modal-body">
@@ -4054,7 +4139,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกปรับสถิติ</button>
               </div>
             </form>
@@ -4071,7 +4156,7 @@ function DashboardApp() {
                 {modalType === 'kpi_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'kpi_add' ? 'เพิ่มตัวชี้วัดใหม่' : 'แก้ไขข้อมูลตัวชี้วัด'}
               </h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitKPI}>
               <div className="modal-body">
@@ -4115,7 +4200,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกตัวชี้วัด</button>
               </div>
             </form>
@@ -4133,7 +4218,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบตัวชี้วัด **{selectedKPI.name}** ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteKPIConfirm}>ลบตัวชี้วัด</button>
             </div>
           </div>
@@ -4149,7 +4234,7 @@ function DashboardApp() {
                 {modalType === 'report_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'report_add' ? 'เพิ่มรายการติดตามรายงานใหม่' : 'แก้ไขข้อมูลติดตามรายงาน'}
               </h3>
-              <button className="btn-close-modal" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitReport}>
               <div className="modal-body">
@@ -4202,7 +4287,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลรายงาน</button>
               </div>
             </form>
@@ -4220,7 +4305,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบข้อมูลโครงการ **{selectedReport.projectName}** (เดือน {selectedReport.month}) ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteReportConfirm}>ลบรายการ</button>
             </div>
           </div>
@@ -4236,7 +4321,7 @@ function DashboardApp() {
                 {modalType === 'women_proj_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'women_proj_add' ? 'เพิ่มโครงการสตรีใหม่' : 'แก้ไขข้อมูลโครงการสตรี'}
               </h3>
-              <button className="modal-close-btn" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="modal-close-btn" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitWomenProject}>
               <div className="modal-body">
@@ -4277,7 +4362,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลโครงการ</button>
               </div>
             </form>
@@ -4295,7 +4380,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบข้อมูลโครงการ **{selectedWomenProject.name}** ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteWomenProjectConfirm}>ลบโครงการ</button>
             </div>
           </div>
@@ -4311,7 +4396,7 @@ function DashboardApp() {
                 {modalType === 'custom_menu_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'custom_menu_add' ? 'เพิ่มรายการเมนูพิเศษใหม่' : 'แก้ไขข้อมูลรายการเมนูพิเศษ'}
               </h3>
-              <button className="modal-close-btn" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="modal-close-btn" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitCustomSpecialMenu}>
               <div className="modal-body">
@@ -4342,7 +4427,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลเมนูพิเศษ</button>
               </div>
             </form>
@@ -4360,7 +4445,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบรายการเมนูพิเศษ **{selectedCustomSpecialMenu.name}** ใช่หรือไม่? (เมนูนี้จะถูกนำออกจากแถบซ้ายมือ)</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteCustomSpecialMenuConfirm}>ลบรายการ</button>
             </div>
           </div>
@@ -4376,7 +4461,7 @@ function DashboardApp() {
                 {modalType === 'ai_question_add' ? <Plus size={16} /> : <Edit2 size={12} />}
                 {modalType === 'ai_question_add' ? 'เพิ่มคำถามวิเคราะห์ด่วนใหม่' : 'แก้ไขข้อมูลคำถามวิเคราะห์ด่วน'}
               </h3>
-              <button className="modal-close-btn" onClick={() => setModalType(null)}><X size={16} /></button>
+              <button className="modal-close-btn" onClick={async () => setModalType(null)}><X size={16} /></button>
             </div>
             <form onSubmit={handleSubmitAiQuestion}>
               <div className="modal-body">
@@ -4417,7 +4502,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลคำถามด่วน</button>
               </div>
             </form>
@@ -4435,7 +4520,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบคำถามด่วน **{selectedAiQuestion.label}** ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteAiQuestionConfirm}>ลบรายการ</button>
             </div>
           </div>
@@ -4453,7 +4538,7 @@ function DashboardApp() {
                   {modalType === 'otop_product_add' ? 'เพิ่มรายการสินค้า OTOP ใหม่' : 'แก้ไขข้อมูลสินค้า OTOP'}
                 </span>
               </div>
-              <button className="btn-close" onClick={() => setModalType(null)}><X size={18} /></button>
+              <button className="btn-close" onClick={async () => setModalType(null)}><X size={18} /></button>
             </div>
             <form onSubmit={handleSubmitOtopProduct}>
               <div className="modal-body">
@@ -4521,7 +4606,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลสินค้า</button>
               </div>
             </form>
@@ -4539,7 +4624,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบสินค้า OTOP **{selectedOtopProduct.name}** ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteOtopProductConfirm}>ลบรายการ</button>
             </div>
           </div>
@@ -4557,7 +4642,7 @@ function DashboardApp() {
                   {modalType === 'document_add' ? 'เพิ่มรายการแบบฟอร์ม/เอกสารใหม่' : 'แก้ไขข้อมูลแบบฟอร์ม/เอกสาร'}
                 </span>
               </div>
-              <button className="btn-close" onClick={() => setModalType(null)}><X size={18} /></button>
+              <button className="btn-close" onClick={async () => setModalType(null)}><X size={18} /></button>
             </div>
             <form onSubmit={handleSubmitDocument}>
               <div className="modal-body">
@@ -4625,7 +4710,7 @@ function DashboardApp() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
                 <button type="submit" className="btn-submit-blue">บันทึกข้อมูลเอกสาร</button>
               </div>
             </form>
@@ -4643,7 +4728,7 @@ function DashboardApp() {
               <span className="confirm-text-desc">คุณต้องการลบเอกสาร **{selectedDocument.name}** ใช่หรือไม่?</span>
             </div>
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-cancel" onClick={() => setModalType(null)}>ยกเลิก</button>
+              <button className="btn-cancel" onClick={async () => setModalType(null)}>ยกเลิก</button>
               <button className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteDocumentConfirm}>ลบรายการ</button>
             </div>
           </div>
