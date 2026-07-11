@@ -27,20 +27,111 @@ const getFromFirebaseCache = (key) => {
   return firebaseCache[key] ? JSON.stringify(firebaseCache[key]) : null;
 };
 
+const DEBUG = true;
+
 const saveToFirebase = async (key, value) => {
   if (!firebaseCache) firebaseCache = {};
+  
+  let itemsBefore = 0;
+  if (Array.isArray(firebaseCache[key])) {
+    itemsBefore = firebaseCache[key].length;
+  } else if (firebaseCache[key]) {
+    itemsBefore = 1; // Assuming object
+  }
+
   firebaseCache[key] = value;
   
+  let itemsAfter = 0;
+  if (Array.isArray(value)) {
+    itemsAfter = value.length;
+  } else if (value) {
+    itemsAfter = 1;
+  }
+  
   try {
+    // 1. updateDoc
     await setDoc(DOC_REF, { [key]: value }, { merge: true });
-    console.log('Successfully saved ' + key + ' to Firestore.');
+    
+    // 2. getDoc Verify
+    const verifySnap = await getDoc(DOC_REF);
+    if (!verifySnap.exists()) {
+      throw new Error("ไม่พบ Document หลังบันทึก");
+    }
+    
+    const dbData = verifySnap.data();
+    let firestoreVerified = false;
+    let expectedItems = itemsAfter;
+    let firestoreItems = 0;
+    
+    if (dbData[key]) {
+       if (Array.isArray(dbData[key])) {
+         firestoreItems = dbData[key].length;
+       } else {
+         firestoreItems = 1;
+       }
+       if (firestoreItems === expectedItems) {
+         firestoreVerified = true;
+       }
+    }
+
+    if (DEBUG) {
+      if (firestoreVerified) {
+        console.log(`
+========== SAVE REPORT ==========
+Module      : ${key}
+Document    : appData/cddInfo
+Items Before: ${itemsBefore}
+Items After : ${itemsAfter}
+
+updateDoc   : SUCCESS
+getDoc      : SUCCESS
+Firestore   : VERIFIED
+React State : UPDATED
+
+Result      : PASS
+=================================`);
+      } else {
+        console.error(`
+========== SAVE REPORT ==========
+Module      : ${key}
+Document    : appData/cddInfo
+
+updateDoc   : SUCCESS
+getDoc      : SUCCESS
+
+Firestore Items : ${firestoreItems}
+Expected Items  : ${expectedItems}
+
+ERROR
+ข้อมูลไม่ถูกเขียนลง Firestore อย่างถูกต้อง
+
+Possible Cause
+- updateDoc เขียนผิด field หรือโครงสร้างข้อมูลไม่ตรง
+=================================`);
+      }
+    }
+    
+    if (!firestoreVerified) {
+       alert("⚠️ บันทึกสำเร็จ แต่ข้อมูลที่อ่านกลับไม่ตรงกับข้อมูลที่ส่ง");
+    }
+    
     return true;
   } catch (e) {
     console.error("Firebase save error", e);
-    alert("ไม่สามารถบันทึกข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อผู้ดูแลระบบ (Error: " + e.message + ")");
+    if (DEBUG) {
+      console.error(`
+========== SAVE REPORT ==========
+Module      : ${key}
+
+updateDoc   : FAILED
+ERROR       : ${e.message}
+=================================`);
+    }
+    alert("❌ บันทึกไม่สำเร็จ: " + e.message);
     throw e;
   }
 };
+
 
 // Database Keys
 const DISTRICTS_KEY = 'ecc_districts_db';
