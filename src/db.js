@@ -24,7 +24,12 @@ const getFromFirebaseCache = (key) => {
 
 const saveToFirebase = (key, value) => {
   firebaseCache[key] = value;
-  setDoc(DOC_REF, { [key]: value }, { merge: true }).catch(console.error);
+  setDoc(DOC_REF, { [key]: value }, { merge: true })
+    .then(() => console.log('Successfully saved ' + key + ' to Firestore.'))
+    .catch(e => {
+      console.error("Firebase save error", e);
+      alert("ไม่สามารถบันทึกข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อผู้ดูแลระบบ (Error: " + e.message + ")");
+    });
 };
 
 const removeFromFirebaseCache = (key) => {
