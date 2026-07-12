@@ -549,9 +549,7 @@ function DashboardApp() {
 
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteGroupConfirm = async () => {
@@ -559,9 +557,7 @@ function DashboardApp() {
     await deleteGroup(selectedGroup.id);
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Budget CRUD Handlers
@@ -630,9 +626,7 @@ function DashboardApp() {
     await saveMonthlyBudgets(updatedBudgets);
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteBudget = async () => {
@@ -642,9 +636,7 @@ function DashboardApp() {
     await saveMonthlyBudgets(updatedBudgets);
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Project CRUD Handlers
@@ -722,9 +714,7 @@ function DashboardApp() {
 
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteProjConfirm = async () => {
@@ -733,9 +723,7 @@ function DashboardApp() {
     alert('ลบโครงการสำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Report CRUD Handlers
@@ -790,9 +778,7 @@ function DashboardApp() {
 
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteReportConfirm = async () => {
@@ -801,9 +787,7 @@ function DashboardApp() {
     alert('ลบรายการติดตามรายงานสำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Women Projects CRUD Handlers
@@ -828,9 +812,7 @@ function DashboardApp() {
     }
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteWomenProjectConfirm = async () => {
@@ -839,9 +821,7 @@ function DashboardApp() {
     alert('ลบโครงการสตรีสำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Custom Special Menus CRUD Handlers
@@ -865,9 +845,7 @@ function DashboardApp() {
     }
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteCustomSpecialMenuConfirm = async () => {
@@ -876,9 +854,7 @@ function DashboardApp() {
     alert('ลบรายการเมนูพิเศษสำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // AI Questions CRUD Handlers
@@ -903,9 +879,7 @@ function DashboardApp() {
     }
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteAiQuestionConfirm = async () => {
@@ -914,9 +888,7 @@ function DashboardApp() {
     alert('ลบคำถามวิเคราะห์ AI สำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // OTOP Product CRUD Handlers
@@ -943,9 +915,7 @@ function DashboardApp() {
     }
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteOtopProductConfirm = async () => {
@@ -954,9 +924,7 @@ function DashboardApp() {
     alert('ลบสินค้า OTOP สำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Document CRUD Handlers
@@ -983,9 +951,7 @@ function DashboardApp() {
     }
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteDocumentConfirm = async () => {
@@ -994,9 +960,7 @@ function DashboardApp() {
     alert('ลบแบบฟอร์ม/เอกสารสำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // KPI CRUD Handlers & Form State
@@ -1065,9 +1029,7 @@ function DashboardApp() {
 
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   const handleDeleteKPIConfirm = async () => {
@@ -1076,9 +1038,7 @@ function DashboardApp() {
     alert('ลบตัวชี้วัดสำเร็จเรียบร้อยแล้ว!');
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // District Edit Handlers
@@ -1145,9 +1105,7 @@ function DashboardApp() {
     await saveDistricts(updated);
     await reloadData();
       setModalType(null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); alert('เกิดข้อผิดพลาด: ' + err.message); }
   };
 
   // Group submenu click helper
