@@ -404,7 +404,15 @@ export async function deleteReport(id) {
 // --- Women Stats ---
 export function getWomenStats() {
   const data = getFromFirebaseCache(WOMEN_STATS_KEY);
-  return data ? JSON.parse(data) : { registeredMembers: 124500, revolvingFund: 34500000 };
+  return data ? JSON.parse(data) : { 
+    registeredMembers: 124500, 
+    revolvingFund: 34500000,
+    overduePercent: 5.2,
+    totalProjects: 120,
+    overdueProjects: 8,
+    litigatedProjects: 2,
+    nearingExpirationProjects: 1
+  };
 }
 
 export async function saveWomenStats(stats) {
