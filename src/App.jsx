@@ -2278,7 +2278,7 @@ function DashboardApp() {
                           <tr>
                             <th>ชื่อโครงการ</th>
                             <th>กู้ยืม</th>
-                            <th>ชำระตรงเวลา</th>
+                            <th>สถานะ</th>
                             <th style={{ width: '80px', textAlign: 'center' }}>จัดการ</th>
                           </tr>
                         </thead>
@@ -2287,7 +2287,7 @@ function DashboardApp() {
                             <tr key={wp.id}>
                               <td style={{ fontWeight: '700', fontSize: '12px' }}>{wp.name}</td>
                               <td style={{ fontSize: '12px' }}>{wp.groupsCount}</td>
-                              <td style={{ color: 'var(--success)', fontWeight: '700', fontSize: '12px' }}>{wp.paybackRate}</td>
+                              <td style={{ color: wp.paybackRate === 'ผิดนัดชำระ' ? 'var(--warning)' : wp.paybackRate === 'ฟ้องศาล' ? 'var(--danger)' : wp.paybackRate === 'ใกล้หมดอายุความ' ? '#f97316' : 'var(--success)', fontWeight: '700', fontSize: '12px' }}>{wp.paybackRate}</td>
                               <td>
                                 <div className="action-buttons" style={{ justifyContent: 'center' }}>
                                   <button className="btn-action edit" onClick={async () => { setSelectedWomenProject(wp); setWomenProjForm({ name: wp.name, groupsCount: wp.groupsCount, paybackRate: wp.paybackRate }); setModalType('women_proj_edit'); }}><Edit2 size={12} /></button>
@@ -3652,14 +3652,14 @@ function DashboardApp() {
                           </div>
                         </div>
                         <table className="summary-table">
-                        <thead><tr><th>โครงการสตรี</th><th>กู้ยืม</th><th>ชำระตรงเวลา</th></tr></thead>
+                        <thead><tr><th>โครงการสตรี</th><th>กู้ยืม</th><th>สถานะ</th></tr></thead>
                         <tbody>
                           {womenProjects.length > 0 ? (
                             womenProjects.map((wp) => (
                               <tr key={wp.id}>
                                 <td>{wp.name}</td>
                                 <td>{wp.groupsCount}</td>
-                                <td style={{ color: 'var(--success)' }}>{wp.paybackRate}</td>
+                                <td style={{ color: wp.paybackRate === 'ผิดนัดชำระ' ? 'var(--warning)' : wp.paybackRate === 'ฟ้องศาล' ? 'var(--danger)' : wp.paybackRate === 'ใกล้หมดอายุความ' ? '#f97316' : 'var(--success)' }}>{wp.paybackRate}</td>
                               </tr>
                             ))
                           ) : (
@@ -4692,15 +4692,19 @@ function DashboardApp() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>อัตราการชำระตรงเวลา / คืนเงินกู้ (%)</label>
-                    <input 
-                      type="text" 
+                    <label>สถานะโครงการ</label>
+                    <select 
                       className="form-input" 
                       value={womenProjForm.paybackRate} 
                       onChange={e => setWomenProjForm({...womenProjForm, paybackRate: e.target.value})}
-                      placeholder="เช่น 95.8%"
                       required
-                    />
+                    >
+                      <option value="" disabled>เลือกสถานะ</option>
+                      <option value="ชำระตรงเวลา">ชำระตรงเวลา</option>
+                      <option value="ผิดนัดชำระ">ผิดนัดชำระ</option>
+                      <option value="ใกล้หมดอายุความ">ใกล้หมดอายุความ</option>
+                      <option value="ฟ้องศาล">ฟ้องศาล</option>
+                    </select>
                   </div>
                 </div>
               </div>
