@@ -66,6 +66,7 @@ const CUSTOM_SPECIAL_MENUS_KEY = 'ecc_custom_special_menus_db';
 const AI_QUESTIONS_KEY = 'ecc_ai_questions_db';
 const OTOP_PRODUCTS_KEY = 'ecc_otop_products_db';
 const GROUP_TYPES_KEY = 'ecc_group_types_db';
+const LEADERS_KEY = 'communityLeaders';
 
 export const DISTRICTS_LIST = [
   'ตำบลกะทู้',
@@ -609,6 +610,16 @@ export function getDocuments() {
 
 export async function saveDocuments(documents) {
   await saveToFirebase(DOCUMENTS_KEY, documents);
+}
+
+// --- Community Leaders ---
+export function getLeaders() {
+  const data = getFromFirebaseCache(LEADERS_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export async function saveLeaders(leaders) {
+  await saveToFirebase(LEADERS_KEY, leaders);
 }
 
 export async function addDocument(document) {
