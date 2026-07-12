@@ -644,11 +644,12 @@ function DashboardApp() {
         budgetType: budgetFormData.budgetType,
         target: targetVal,
         actual: actualVal,
-        status: budgetFormData.status
+        status: budgetFormData.status,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5)
       };
       updatedBudgets.push(newB);
     } else if (modalType === 'budget_edit' && selectedBudget) {
-      const index = updatedBudgets.findIndex(b => b.month === selectedBudget.month && b.year === selectedBudget.year);
+      const index = updatedBudgets.findIndex(b => b === selectedBudget || (b.id && b.id === selectedBudget.id));
       if (index !== -1) {
         updatedBudgets[index] = {
           ...updatedBudgets[index],
@@ -672,7 +673,7 @@ function DashboardApp() {
   const handleDeleteBudget = async () => {
     try {
     if (!selectedBudget) return;
-    const updatedBudgets = monthlyBudgets.filter(b => !(b.month === selectedBudget.month && b.year === selectedBudget.year));
+    const updatedBudgets = monthlyBudgets.filter(b => b !== selectedBudget && (!b.id || b.id !== selectedBudget.id));
     await saveMonthlyBudgets(updatedBudgets);
     await reloadData();
       setModalType(null);
@@ -3946,7 +3947,7 @@ function DashboardApp() {
               <h3 className="modal-title" style={{ color: 'var(--danger)' }}><AlertTriangle size={18} /> ยืนยันการลบ</h3>
             </div>
             <div className="modal-body" style={{ textAlign: 'center', padding: '30px 20px' }}>
-              <p>คุณต้องการลบข้อมูลงบประมาณเดือน <strong>{selectedBudget?.month}</strong> ใช่หรือไม่?</p>
+              <p>คุณต้องการลบข้อมูล <strong>{selectedBudget?.planName || selectedBudget?.budgetType}</strong> ประจำเดือน {selectedBudget?.month} {selectedBudget?.year} ใช่หรือไม่?</p>
               <p style={{ color: '#64748b', fontSize: '13px', marginTop: '10px' }}>การกระทำนี้ไม่สามารถกู้คืนได้</p>
             </div>
             <div className="modal-actions" style={{ justifyContent: 'center' }}>
