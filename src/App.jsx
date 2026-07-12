@@ -1270,7 +1270,7 @@ function DashboardApp() {
       <div className="login-screen-wrapper">
         <div className="login-card">
           <div className="login-logo-container">
-            <img src="/logo.png" alt="พช. Logo" />
+            <img src="./logo.png" alt="พช. Logo" />
           </div>
           <div className="login-title-group">
             <h2 className="login-title">ระบบสารสนเทศ (ECC Command Center)</h2>
@@ -1324,7 +1324,7 @@ function DashboardApp() {
       <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-container" style={{ backgroundColor: 'white', overflow: 'hidden', padding: '2px' }}>
-            <img src="/logo.png" alt="พช. Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src="./logo.png" alt="พช. Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div className="logo-text">
             <span className="title-th">พช.อำเภอกะทู้</span>
@@ -1557,7 +1557,7 @@ function DashboardApp() {
                 justifyContent: 'center',
                 border: isAdminMode ? '2px solid var(--warning)' : '1px solid var(--border-color)'
               }}>
-                <img src="/logo.png" alt="พช. Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src="./logo.png" alt="พช. Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div className="user-info">
                 <span className="user-name">{currentUser?.name}</span>
