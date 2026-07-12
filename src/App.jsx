@@ -1,5 +1,7 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
+import { db, rtdb, auth } from './firebase';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import {
   Menu,
   Bell,
@@ -80,7 +82,7 @@ import {
   updateOtopProduct,
   deleteOtopProduct,
   OTOP_CATEGORIES,
-  validateUserLogin,
+  getUserRoleByEmail,
   getDocuments,
   addDocument,
   updateDocument,
@@ -235,37 +237,74 @@ function DashboardApp() {
     const saved = sessionStorage.getItem('ecc_current_user');
     return saved ? JSON.parse(saved) : null;
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const roleInfo = getUserRoleByEmail(firebaseUser.email);
+        if (roleInfo) {
+          const userData = { ...roleInfo, uid: firebaseUser.uid };
+          sessionStorage.setItem('ecc_current_user', JSON.stringify(userData));
+          setCurrentUser(userData);
+          if (roleInfo.role === 'admin') {
+            setIsAdminMode(true);
+            setActiveMenu('AdminPanel');
+          } else {
+            setIsAdminMode(false);
+            setActiveMenu('ภาพรวมบริหาร');
+          }
+        } else {
+          // If logged in but no role found, log them out
+          signOut(auth);
+          setCurrentUser(null);
+        }
+      } else {
+        sessionStorage.removeItem('ecc_current_user');
+        setCurrentUser(null);
+        setIsAdminMode(false);
+        setActiveMenu('ภาพรวมบริหาร');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
-    const user = validateUserLogin(loginUsername, loginPassword);
-    if (user) {
-      sessionStorage.setItem('ecc_current_user', JSON.stringify(user));
-      setCurrentUser(user);
-      if (user.role === 'admin') {
-        setIsAdminMode(true);
-        setActiveMenu('AdminPanel');
+    
+    // Check if email has access first
+    const roleInfo = getUserRoleByEmail(loginUsername);
+    if (!roleInfo) {
+      setLoginError('อีเมลนี้ไม่มีสิทธิ์เข้าใช้งานระบบ');
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, loginUsername, loginPassword);
+      // Success will be handled by onAuthStateChanged
+    } catch (error) {
+      console.error("Login error", error);
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+        setLoginError('อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
       } else {
-        setIsAdminMode(false);
-        setActiveMenu('ภาพรวมบริหาร');
+        setLoginError('เกิดข้อผิดพลาดในการเข้าสู่ระบบ: ' + error.message);
       }
-    } else {
-      setLoginError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('ecc_current_user');
-    setCurrentUser(null);
-    setIsAdminMode(false);
-    setActiveMenu('ภาพรวมบริหาร');
-    setLoginUsername('');
-    setLoginPassword('');
-    setLoginError('');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setLoginUsername('');
+      setLoginPassword('');
+      setLoginError('');
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
 
   // Navigation & Role states
@@ -1279,11 +1318,11 @@ function DashboardApp() {
           
           <form className="login-form" onSubmit={handleLoginSubmit}>
             <div className="login-input-group">
-              <label className="login-label">ชื่อผู้ใช้งาน (Username)</label>
+              <label className="login-label">อีเมลผู้ใช้งาน (Email)</label>
               <input 
-                type="text" 
+                type="email" 
                 className="login-input-field"
-                placeholder="ป้อนชื่อผู้ใช้งาน..."
+                placeholder="ป้อนอีเมลผู้ใช้งาน..."
                 value={loginUsername}
                 onChange={e => setLoginUsername(e.target.value)}
                 required

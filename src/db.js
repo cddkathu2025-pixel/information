@@ -748,15 +748,13 @@ export function queryAI(prompt) {
 4. **"รายงานโครงการที่ล่าช้า"** (เพื่อติดตามโครงการสถานะสีแดงในระบบติดตาม)`;
 }
 
-export function validateUserLogin(username, password) {
-  const users = [
-    { username: 'executive', password: 'executive123', name: 'พัฒนาการอำเภอกะทู้', role: 'executive' },
-    { username: 'admin', password: 'admin123', name: 'ผู้ดูแลระบบ (Admin)', role: 'admin' }
-  ];
-  const match = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-  if (match) {
-    const { password: _, ...userWithoutPassword } = match;
-    return userWithoutPassword;
+export function getUserRoleByEmail(email) {
+  const normalizedEmail = (email || '').toLowerCase().trim();
+  if (normalizedEmail === 'executive@cddkathu.com' || normalizedEmail === 'cdd@kathu.com') {
+    return { name: 'ผู้ใช้งาน', role: 'executive', email: normalizedEmail };
+  }
+  if (normalizedEmail === 'admin@cddkathu.com' || normalizedEmail === 'cddkathu@2569.com') {
+    return { name: 'แอดมิน (Admin)', role: 'admin', email: normalizedEmail };
   }
   return null;
 }
