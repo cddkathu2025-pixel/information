@@ -346,8 +346,13 @@ function DashboardApp() {
   
   // Forms for special menus
   const [womenStatsForm, setWomenStatsForm] = useState({
-    registeredMembers: 124500,
-    revolvingFund: 34500000
+    registeredMembers: womenStats.registeredMembers || 124500,
+    revolvingFund: womenStats.revolvingFund || 34500000,
+    overduePercent: womenStats.overduePercent || 0,
+    totalProjects: womenStats.totalProjects || 0,
+    overdueProjects: womenStats.overdueProjects || 0,
+    litigatedProjects: womenStats.litigatedProjects || 0,
+    nearingExpirationProjects: womenStats.nearingExpirationProjects || 0
   });
   const [womenProjForm, setWomenProjForm] = useState({
     name: '',
@@ -1432,6 +1437,16 @@ function DashboardApp() {
 
           <li className="menu-item-container">
             <div 
+              className={`menu-item ${activeMenu === 'ผู้นำชุมชน' && !isAdminMode ? 'active' : ''}`}
+              onClick={async () => { setActiveMenu('ผู้นำชุมชน'); setIsAdminMode(false); }}
+            >
+              <Users size={18} />
+              <span className="menu-item-text">ผู้นำชุมชน</span>
+            </div>
+          </li>
+
+          <li className="menu-item-container">
+            <div 
               className={`menu-item ${activeMenu === 'ปฏิทินงาน' && !isAdminMode ? 'active' : ''}`}
               onClick={async () => { setActiveMenu('ปฏิทินงาน'); setIsAdminMode(false); }}
             >
@@ -2220,21 +2235,31 @@ function DashboardApp() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label style={{ fontSize: '12px' }}>สตรีจดทะเบียนสมาชิก (ราย)</label>
-                        <input 
-                          type="number" 
-                          className="form-input" 
-                          value={womenStatsForm.registeredMembers} 
-                          onChange={e => setWomenStatsForm({...womenStatsForm, registeredMembers: parseInt(e.target.value) || 0})}
-                        />
+                        <input type="number" className="form-input" value={womenStatsForm.registeredMembers} onChange={e => setWomenStatsForm({...womenStatsForm, registeredMembers: parseInt(e.target.value) || 0})} />
                       </div>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label style={{ fontSize: '12px' }}>ทุนหมุนเวียนกู้ยืม (บาท)</label>
-                        <input 
-                          type="number" 
-                          className="form-input" 
-                          value={womenStatsForm.revolvingFund} 
-                          onChange={e => setWomenStatsForm({...womenStatsForm, revolvingFund: parseInt(e.target.value) || 0})}
-                        />
+                        <input type="number" className="form-input" value={womenStatsForm.revolvingFund} onChange={e => setWomenStatsForm({...womenStatsForm, revolvingFund: parseInt(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '12px' }}>อัตราร้อยละหนี้เกินชำระ (%)</label>
+                        <input type="number" className="form-input" value={womenStatsForm.overduePercent} onChange={e => setWomenStatsForm({...womenStatsForm, overduePercent: parseFloat(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '12px' }}>จำนวนโครงการทั้งหมด</label>
+                        <input type="number" className="form-input" value={womenStatsForm.totalProjects} onChange={e => setWomenStatsForm({...womenStatsForm, totalProjects: parseInt(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '12px' }}>โครงการที่ผิดชำระหนี้</label>
+                        <input type="number" className="form-input" value={womenStatsForm.overdueProjects} onChange={e => setWomenStatsForm({...womenStatsForm, overdueProjects: parseInt(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '12px' }}>โครงการที่ดำเนินการฟ้อง</label>
+                        <input type="number" className="form-input" value={womenStatsForm.litigatedProjects} onChange={e => setWomenStatsForm({...womenStatsForm, litigatedProjects: parseInt(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '12px' }}>โครงการที่ใกล้หมดอายุความ</label>
+                        <input type="number" className="form-input" value={womenStatsForm.nearingExpirationProjects} onChange={e => setWomenStatsForm({...womenStatsForm, nearingExpirationProjects: parseInt(e.target.value) || 0})} />
                       </div>
                     </div>
                     <button className="btn-add-new" style={{ width: '100%', marginBottom: '20px', padding: '8px 12px', display: 'flex', justifyContent: 'center' }} onClick={async () => { await saveWomenStats(womenStatsForm); await reloadData(); alert('บันทึกสถิติกองทุนพัฒนาบทบาทสตรีสำเร็จ!'); }}>
@@ -3581,18 +3606,52 @@ function DashboardApp() {
                     <button className={`tab-btn ${specialTab === 'tpmap' ? 'active' : ''}`} onClick={async () => setSpecialTab('tpmap')}>ระบบคนจนชี้เป้า TPMAP</button>
                   </div>
                   {specialTab === 'women' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
-                      <div className="bar-chart-container">
-                        <div className="bar-row">
-                          <div className="bar-row-label-row"><span>👩 สตรีจดทะเบียนสมาชิก</span><span>{formatCurrency(womenStats.registeredMembers)} ราย</span></div>
-                          <div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min(100, (womenStats.registeredMembers / 150000) * 100)}%`, backgroundColor: '#ec4899' }}></div></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
+                      <div className="summary-cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                        <div className="summary-card" style={{ padding: '15px' }}>
+                          <div className="card-details">
+                            <span className="card-label">อัตราร้อยละหนี้เกินชำระ</span>
+                            <span className="card-value" style={{ color: 'var(--danger)', fontSize: '24px' }}>{womenStats.overduePercent || 0}%</span>
+                          </div>
                         </div>
-                        <div className="bar-row">
-                          <div className="bar-row-label-row"><span>💰 ทุนหมุนเวียนกู้ยืม</span><span>{formatCurrency(womenStats.revolvingFund)} บาท</span></div>
-                          <div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min(100, (womenStats.revolvingFund / 50000000) * 100)}%`, backgroundColor: '#8b5cf6' }}></div></div>
+                        <div className="summary-card" style={{ padding: '15px' }}>
+                          <div className="card-details">
+                            <span className="card-label">จำนวนโครงการทั้งหมด</span>
+                            <span className="card-value" style={{ fontSize: '24px' }}>{formatCurrency(womenStats.totalProjects || 0)}</span>
+                          </div>
+                        </div>
+                        <div className="summary-card" style={{ padding: '15px' }}>
+                          <div className="card-details">
+                            <span className="card-label">ผิดชำระหนี้</span>
+                            <span className="card-value" style={{ color: 'var(--warning)', fontSize: '24px' }}>{formatCurrency(womenStats.overdueProjects || 0)}</span>
+                          </div>
+                        </div>
+                        <div className="summary-card" style={{ padding: '15px' }}>
+                          <div className="card-details">
+                            <span className="card-label">ดำเนินการฟ้อง</span>
+                            <span className="card-value" style={{ color: '#ef4444', fontSize: '24px' }}>{formatCurrency(womenStats.litigatedProjects || 0)}</span>
+                          </div>
+                        </div>
+                        <div className="summary-card" style={{ padding: '15px' }}>
+                          <div className="card-details">
+                            <span className="card-label">ใกล้หมดอายุความ</span>
+                            <span className="card-value" style={{ color: '#f97316', fontSize: '24px' }}>{formatCurrency(womenStats.nearingExpirationProjects || 0)}</span>
+                          </div>
                         </div>
                       </div>
-                      <table className="summary-table">
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="bar-chart-container">
+                          <div className="bar-row">
+                            <div className="bar-row-label-row"><span>👩 สตรีจดทะเบียนสมาชิก</span><span>{formatCurrency(womenStats.registeredMembers)} ราย</span></div>
+                            <div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min(100, (womenStats.registeredMembers / 150000) * 100)}%`, backgroundColor: '#ec4899' }}></div></div>
+                          </div>
+                          <div className="bar-row">
+                            <div className="bar-row-label-row"><span>💰 ทุนหมุนเวียนกู้ยืม</span><span>{formatCurrency(womenStats.revolvingFund)} บาท</span></div>
+                            <div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min(100, (womenStats.revolvingFund / 50000000) * 100)}%`, backgroundColor: '#8b5cf6' }}></div></div>
+                          </div>
+                        </div>
+                        <table className="summary-table">
                         <thead><tr><th>โครงการสตรี</th><th>กู้ยืม</th><th>ชำระตรงเวลา</th></tr></thead>
                         <tbody>
                           {womenProjects.length > 0 ? (
@@ -3610,6 +3669,7 @@ function DashboardApp() {
                           )}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   )}
                   {specialTab === 'tpmap' && (() => {
