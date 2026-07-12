@@ -85,6 +85,8 @@ import {
   OTOP_CATEGORIES,
   getUserRoleByEmail,
   getDocuments,
+  getLeaders,
+  saveLeaders,
   addDocument,
   updateDocument,
   deleteDocument
@@ -330,6 +332,10 @@ function DashboardApp() {
   const [kpis, setKPIs] = useState(() => getKPIs());
   const [groupTypes, setGroupTypes] = useState(() => getGroupTypes());
   const [reports, setReports] = useState(() => getReports());
+  const [leaders, setLeaders] = useState(() => getLeaders());
+  const [leaderForm, setLeaderForm] = useState({ id: '', name: '', village: '', position: '', subdistrict: 'กะทู้', district: 'กะทู้', phone: '' });
+  const [filterSubdistrict, setFilterSubdistrict] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedKPI, setSelectedKPI] = useState(null);
   
   // Special Portals States
@@ -510,6 +516,7 @@ function DashboardApp() {
     setKPIs(getKPIs());
     setGroupTypes(getGroupTypes());
     setReports(getReports());
+    setLeaders(getLeaders());
     setWomenStats(getWomenStats());
     setWomenProjects(getWomenProjects());
     setTpmapStats(getTpmapStats());
@@ -722,6 +729,44 @@ function DashboardApp() {
   const handleOpenDeleteProject = (p) => {
     setSelectedProject(p);
     setModalType('project_delete');
+  };
+
+  
+  const handleSaveLeader = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const allLeaders = [...leaders];
+      if (modalType === 'leader_edit') {
+        const index = allLeaders.findIndex(l => l.id === leaderForm.id);
+        if (index > -1) allLeaders[index] = leaderForm;
+      } else {
+        allLeaders.push({ ...leaderForm, id: 'ld_' + Date.now() });
+      }
+      await saveLeaders(allLeaders);
+      await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteLeader = async () => {
+    setIsLoading(true);
+    try {
+      const allLeaders = leaders.filter(l => l.id !== leaderForm.id);
+      await saveLeaders(allLeaders);
+      await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmitProject = async (e) => {
@@ -1645,6 +1690,7 @@ function DashboardApp() {
                 <button className={`tab-btn ${adminTab === 'reports' ? 'active' : ''}`} onClick={async () => setAdminTab('reports')}>
                   📝 ติดตามส่งรายงาน ({reports.length})
                 </button>
+                <button className={`tab-btn ${adminTab === 'leaders' ? 'active' : ''}`} onClick={async () => setAdminTab('leaders')}>ผู้นำชุมชน</button>
                 <button className={`tab-btn ${adminTab === 'special_portals' ? 'active' : ''}`} onClick={async () => { setAdminTab('special_portals'); setWomenStatsForm(getWomenStats()); setTpmapStatsForm(getTpmapStats()); }}>
                   ⚙️ จัดการเมนูพิเศษ พช.
                 </button>
@@ -2099,7 +2145,70 @@ function DashboardApp() {
               )}
 
               {/* ADMIN TAB 7: SPECIAL PORTALS MANAGEMENT */}
-              {adminTab === 'special_portals' && (
+              
+                  {adminTab === 'leaders' && (
+                    <div className="fade-in">
+                      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div>
+                          <h3 className="section-title">จัดการข้อมูลผู้นำชุมชน</h3>
+                          <p className="section-subtitle">เพิ่ม ลบ แก้ไข รายชื่อผู้นำชุมชน</p>
+                        </div>
+                        <button className="btn-add-new" onClick={async () => { 
+                          setLeaderForm({ id: '', name: '', village: '', position: '', subdistrict: 'กะทู้', district: 'กะทู้', phone: '' }); 
+                          setModalType('leader_add'); 
+                        }}>
+                          <Plus size={16} /> เพิ่มผู้นำชุมชน
+                        </button>
+                      </div>
+                      
+                      <div className="data-table-wrapper">
+                        <table className="data-table">
+                          <thead>
+                            <tr>
+                              <th>ชื่อ-สกุล</th>
+                              <th>ตำแหน่ง</th>
+                              <th>หมู่/ชุมชน</th>
+                              <th>ตำบล</th>
+                              <th>เบอร์โทรศัพท์</th>
+                              <th style={{ width: '100px', textAlign: 'center' }}>จัดการ</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {leaders.map((leader, index) => (
+                              <tr key={leader.id || index}>
+                                <td>{leader.name}</td>
+                                <td>{leader.position}</td>
+                                <td>{leader.village}</td>
+                                <td>{leader.subdistrict}</td>
+                                <td>{leader.phone}</td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <div className="action-buttons" style={{ justifyContent: 'center' }}>
+                                    <button className="action-btn edit-btn" title="แก้ไข" onClick={async () => {
+                                      setLeaderForm({...leader});
+                                      setModalType('leader_edit');
+                                    }}>
+                                      <Edit2 size={14} />
+                                    </button>
+                                    <button className="action-btn delete-btn" title="ลบ" onClick={async () => {
+                                      setLeaderForm({...leader});
+                                      setModalType('leader_delete');
+                                    }}>
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                            {leaders.length === 0 && (
+                              <tr><td colSpan="6" style={{ textAlign: 'center', color: '#64748b' }}>ไม่มีข้อมูล</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {adminTab === 'special_portals' && (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
                   {/* Panel 1: Women's Fund */}
@@ -2576,6 +2685,65 @@ function DashboardApp() {
           {!isAdminMode && (
             <>
               {/* PAGE 1: EXECUTIVE OVERVIEW */}
+              
+              {activeMenu === 'ผู้นำชุมชน' && (
+                <div className="fade-in">
+                  <div className="content-header">
+                    <h2 className="content-title"><Users size={24} style={{ color: 'var(--primary)' }} /> ทำเนียบผู้นำชุมชน</h2>
+                    <p className="content-subtitle">ข้อมูลติดต่อผู้นำชุมชนในพื้นที่อำเภอกะทู้</p>
+                  </div>
+                  <div className="dashboard-card">
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                      <input 
+                        type="text" 
+                        placeholder="ค้นหาชื่อ, หมู่บ้าน, หรือตำแหน่ง..." 
+                        className="form-input" 
+                        style={{ maxWidth: '300px' }}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <select className="form-input" style={{ maxWidth: '200px' }} onChange={(e) => setFilterSubdistrict(e.target.value)}>
+                        <option value="">ทุกตำบล</option>
+                        <option value="กะทู้">กะทู้</option>
+                        <option value="ป่าตอง">ป่าตอง</option>
+                        <option value="กมลา">กมลา</option>
+                      </select>
+                    </div>
+                    
+                    <div className="data-table-wrapper">
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th>ชื่อ-สกุล</th>
+                            <th>ตำแหน่ง</th>
+                            <th>หมู่/ชุมชน</th>
+                            <th>ตำบล</th>
+                            <th>อำเภอ</th>
+                            <th>เบอร์โทรศัพท์</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {leaders
+                            .filter(l => (!filterSubdistrict || l.subdistrict === filterSubdistrict) && (!searchTerm || l.name.includes(searchTerm) || l.village.includes(searchTerm) || l.position.includes(searchTerm)))
+                            .map((leader, i) => (
+                            <tr key={leader.id || i}>
+                              <td style={{ fontWeight: '500' }}>{leader.name}</td>
+                              <td><span className="status-badge status-in-progress">{leader.position}</span></td>
+                              <td>{leader.village}</td>
+                              <td>{leader.subdistrict}</td>
+                              <td>{leader.district}</td>
+                              <td><a href={`tel:${leader.phone}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>📞 {leader.phone}</a></td>
+                            </tr>
+                          ))}
+                          {leaders.length === 0 && (
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>ยังไม่มีข้อมูลผู้นำชุมชน</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeMenu === 'ภาพรวมบริหาร' && (
                 <>
                   <section className="summary-cards-grid">
