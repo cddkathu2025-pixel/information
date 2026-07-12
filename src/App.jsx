@@ -445,6 +445,7 @@ function DashboardApp() {
 
   // Modals state
   const [modalType, setModalType] = useState(null); 
+  const [isLoading, setIsLoading] = useState(false);
   // 'group_add', 'group_edit', 'group_view', 'group_delete', 'project_add', 'project_edit', 'project_view', 'project_delete', 'district_edit', 'indicators', 'budget'
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
