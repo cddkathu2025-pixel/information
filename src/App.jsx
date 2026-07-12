@@ -445,7 +445,6 @@ function DashboardApp() {
 
   // Modals state
   const [modalType, setModalType] = useState(null); 
-  const [isLoading, setIsLoading] = useState(false);
   // 'group_add', 'group_edit', 'group_view', 'group_delete', 'project_add', 'project_edit', 'project_view', 'project_delete', 'district_edit', 'indicators', 'budget'
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -1427,16 +1426,6 @@ function DashboardApp() {
             >
               <Home size={18} />
               <span className="menu-item-text">หน้าแรกภาพรวมผู้บริหาร</span>
-            </div>
-          </li>
-
-          <li className="menu-item-container">
-            <div 
-              className={`menu-item ${activeMenu === 'ผู้นำชุมชน' && !isAdminMode ? 'active' : ''}`}
-              onClick={async () => { setActiveMenu('ผู้นำชุมชน'); setIsAdminMode(false); }}
-            >
-              <Users size={18} />
-              <span className="menu-item-text">ผู้นำชุมชน</span>
             </div>
           </li>
 
