@@ -1432,6 +1432,16 @@ function DashboardApp() {
 
           <li className="menu-item-container">
             <div 
+              className={`menu-item ${activeMenu === 'ผู้นำชุมชน' && !isAdminMode ? 'active' : ''}`}
+              onClick={async () => { setActiveMenu('ผู้นำชุมชน'); setIsAdminMode(false); }}
+            >
+              <Users size={18} />
+              <span className="menu-item-text">ผู้นำชุมชน</span>
+            </div>
+          </li>
+
+          <li className="menu-item-container">
+            <div 
               className={`menu-item ${activeMenu === 'ปฏิทินงาน' && !isAdminMode ? 'active' : ''}`}
               onClick={async () => { setActiveMenu('ปฏิทินงาน'); setIsAdminMode(false); }}
             >
