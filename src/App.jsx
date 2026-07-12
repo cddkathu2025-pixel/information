@@ -4034,6 +4034,87 @@ function DashboardApp() {
       )}
 
       {/* 4. View Project modal */}
+      
+      {/* Leader Modals */}
+      {(modalType === 'leader_add' || modalType === 'leader_edit') && (
+        <div className="modal-backdrop">
+          <div className="modal-content slide-in" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {modalType === 'leader_add' ? <Plus size={16} /> : <Edit2 size={12} />}
+                {modalType === 'leader_add' ? 'เพิ่มผู้นำชุมชน' : 'แก้ไขผู้นำชุมชน'}
+              </h3>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleSaveLeader}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">ชื่อ-สกุล <span className="required">*</span></label>
+                  <input type="text" className="form-input" required value={leaderForm.name} onChange={e => setLeaderForm({...leaderForm, name: e.target.value})} placeholder="เช่น นายสมชาย ใจดี" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">ตำแหน่ง <span className="required">*</span></label>
+                  <input type="text" className="form-input" required value={leaderForm.position} onChange={e => setLeaderForm({...leaderForm, position: e.target.value})} placeholder="เช่น ผู้ใหญ่บ้าน, กำนัน" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">หมู่/ชุมชน <span className="required">*</span></label>
+                  <input type="text" className="form-input" required value={leaderForm.village} onChange={e => setLeaderForm({...leaderForm, village: e.target.value})} placeholder="เช่น หมู่ 1 บ้านทุ่งทอง" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="form-group">
+                    <label className="form-label">ตำบล <span className="required">*</span></label>
+                    <select className="form-input" value={leaderForm.subdistrict} onChange={e => setLeaderForm({...leaderForm, subdistrict: e.target.value})}>
+                      <option value="กะทู้">กะทู้</option>
+                      <option value="ป่าตอง">ป่าตอง</option>
+                      <option value="กมลา">กมลา</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">อำเภอ <span className="required">*</span></label>
+                    <input type="text" className="form-input" required value={leaderForm.district} onChange={e => setLeaderForm({...leaderForm, district: e.target.value})} readOnly />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">เบอร์โทรศัพท์</label>
+                  <input type="tel" className="form-input" value={leaderForm.phone} onChange={e => setLeaderForm({...leaderForm, phone: e.target.value})} placeholder="08X-XXX-XXXX" />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)} disabled={isLoading}>ยกเลิก</button>
+                <button type="submit" className="btn-submit-blue" disabled={isLoading}>
+                  {isLoading ? 'กำลังบันทึก...' : (modalType === 'leader_add' ? 'บันทึกข้อมูล' : 'บันทึกการแก้ไข')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modalType === 'leader_delete' && (
+        <div className="modal-backdrop">
+          <div className="modal-content confirm-width slide-in">
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ color: '#ef4444' }}><Trash2 size={16} /> ยืนยันการลบข้อมูล</h3>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={20} /></button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '30px 20px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', marginBottom: '20px' }}>
+                <AlertTriangle size={32} />
+              </div>
+              <p style={{ fontSize: '16px', color: 'var(--text-light)', margin: '0 0 10px 0' }}>คุณต้องการลบข้อมูลผู้นำชุมชน</p>
+              <h4 style={{ fontSize: '20px', color: '#fff', margin: '0' }}>{leaderForm.name}</h4>
+              <p style={{ color: 'var(--danger)', fontSize: '14px', marginTop: '15px' }}>การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+            </div>
+            <div className="modal-footer" style={{ justifyContent: 'center' }}>
+              <button type="button" className="btn-cancel" onClick={async () => setModalType(null)} disabled={isLoading}>ยกเลิก</button>
+              <button type="button" className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteLeader} disabled={isLoading}>
+                {isLoading ? 'กำลังลบ...' : 'ลบข้อมูล'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {modalType === 'project_view' && selectedProject && (
         <div className="modal-backdrop">
           <div className="modal-content">
