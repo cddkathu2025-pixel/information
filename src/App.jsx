@@ -31,7 +31,8 @@ import {
   Unlock,
   LogIn,
   LogOut,
-  Download
+  Download,
+  Calendar
 } from 'lucide-react';
 import {
   getDistricts,
@@ -1380,6 +1381,16 @@ function DashboardApp() {
             >
               <Home size={18} />
               <span className="menu-item-text">หน้าแรกภาพรวมผู้บริหาร</span>
+            </div>
+          </li>
+
+          <li className="menu-item-container">
+            <div 
+              className={`menu-item ${activeMenu === 'ปฏิทินงาน' && !isAdminMode ? 'active' : ''}`}
+              onClick={async () => { setActiveMenu('ปฏิทินงาน'); setIsAdminMode(false); }}
+            >
+              <Calendar size={18} />
+              <span className="menu-item-text">ปฏิทินปฏิบัติงาน</span>
             </div>
           </li>
 
@@ -2755,6 +2766,29 @@ function DashboardApp() {
               )}
 
               {/* PAGE 2: KPI DASHBOARD */}
+              {activeMenu === 'ปฏิทินงาน' && (
+                <div className="fade-in">
+                  <div className="content-header">
+                    <h2 className="content-title"><Calendar size={24} style={{ color: 'var(--primary)' }} /> ปฏิทินปฏิบัติงาน</h2>
+                    <p className="content-subtitle">ตารางการปฏิบัติงานและกิจกรรมของสำนักงานพัฒนาชุมชนอำเภอกะทู้</p>
+                  </div>
+                  <div className="dashboard-card" style={{ padding: '0', overflow: 'hidden', height: '600px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '10px' }}>
+                        * นี่คือตัวอย่างปฏิทิน คุณสามารถนำโค้ด Embed จาก Google Calendar ของคุณมาใส่แทนที่ได้
+                      </p>
+                    </div>
+                    <iframe 
+                      src="https://calendar.google.com/calendar/embed?src=th.th%23holiday%40group.v.calendar.google.com&ctz=Asia%2FBangkok" 
+                      style={{ border: 0, width: '100%', height: '100%', flex: 1 }} 
+                      frameBorder="0" 
+                      scrolling="no"
+                      title="Google Calendar"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+
               {activeMenu === 'ตัวชี้วัด' && (
                 <div className="dashboard-card">
                   <div className="page-tabs-bar">
