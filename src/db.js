@@ -1,20 +1,21 @@
-import { db } from './firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { rtdb } from './firebase';
+import { ref, get, set, child } from 'firebase/database';
 
-const DOC_REF = doc(db, 'appData', 'cddInfo');
-export let firebaseCache = null; // null indicates uninitialized
+const DB_REF = ref(rtdb);
+const APP_PATH = 'appData/cddInfo';
+export let firebaseCache = null;
 
 export const loadFirebaseData = async () => {
   try {
-    const snap = await getDoc(DOC_REF);
+    const snap = await get(child(DB_REF, APP_PATH));
     if (snap.exists()) {
-      firebaseCache = snap.data();
+      firebaseCache = snap.val();
     } else {
       firebaseCache = {};
     }
     return true;
   } catch (e) {
-    console.error("Firebase load error", e);
+    console.error("Firebase RTDB load error", e);
     firebaseCache = {};
     return false;
   }
@@ -31,103 +32,21 @@ const DEBUG = true;
 
 const saveToFirebase = async (key, value) => {
   if (!firebaseCache) firebaseCache = {};
-  
-  let itemsBefore = 0;
-  if (Array.isArray(firebaseCache[key])) {
-    itemsBefore = firebaseCache[key].length;
-  } else if (firebaseCache[key]) {
-    itemsBefore = 1; // Assuming object
-  }
-
   firebaseCache[key] = value;
   
-  let itemsAfter = 0;
-  if (Array.isArray(value)) {
-    itemsAfter = value.length;
-  } else if (value) {
-    itemsAfter = 1;
-  }
-  
   try {
-    // 1. updateDoc
-    await setDoc(DOC_REF, { [key]: value }, { merge: true });
+    await set(ref(rtdb, `${APP_PATH}/${key}`), value);
     
-    // 2. getDoc Verify
-    const verifySnap = await getDoc(DOC_REF);
-    if (!verifySnap.exists()) {
-      throw new Error("ไม่พบ Document หลังบันทึก");
-    }
-    
-    const dbData = verifySnap.data();
-    let firestoreVerified = false;
-    let expectedItems = itemsAfter;
-    let firestoreItems = 0;
-    
-    if (dbData[key]) {
-       if (Array.isArray(dbData[key])) {
-         firestoreItems = dbData[key].length;
-       } else {
-         firestoreItems = 1;
-       }
-       if (firestoreItems === expectedItems) {
-         firestoreVerified = true;
-       }
-    }
-
-    if (DEBUG) {
-      if (firestoreVerified) {
-        console.log(`
-========== SAVE REPORT ==========
-Module      : ${key}
-Document    : appData/cddInfo
-Items Before: ${itemsBefore}
-Items After : ${itemsAfter}
-
-updateDoc   : SUCCESS
-getDoc      : SUCCESS
-Firestore   : VERIFIED
-React State : UPDATED
-
-Result      : PASS
-=================================`);
-      } else {
-        console.error(`
-========== SAVE REPORT ==========
-Module      : ${key}
-Document    : appData/cddInfo
-
-updateDoc   : SUCCESS
-getDoc      : SUCCESS
-
-Firestore Items : ${firestoreItems}
-Expected Items  : ${expectedItems}
-
-ERROR
-ข้อมูลไม่ถูกเขียนลง Firestore อย่างถูกต้อง
-
-Possible Cause
-- updateDoc เขียนผิด field หรือโครงสร้างข้อมูลไม่ตรง
-=================================`);
-      }
-    }
-    
-    if (!firestoreVerified) {
-       alert("⚠️ บันทึกสำเร็จ แต่ข้อมูลที่อ่านกลับไม่ตรงกับข้อมูลที่ส่ง");
+    // Optional: read back to verify
+    const verifySnap = await get(child(DB_REF, `${APP_PATH}/${key}`));
+    if (!verifySnap.exists() && value && (Array.isArray(value) ? value.length > 0 : true)) {
+      throw new Error("ไม่พบข้อมูลบนฐานข้อมูลหลังบันทึก (RTDB)");
     }
     
     return true;
   } catch (e) {
-    console.error("Firebase save error", e);
-    if (DEBUG) {
-      console.error(`
-========== SAVE REPORT ==========
-Module      : ${key}
-
-updateDoc   : FAILED
-ERROR       : ${e.message}
-=================================`);
-    }
-    alert("❌ บันทึกไม่สำเร็จ: " + e.message);
+    console.error("Firebase RTDB save error", e);
+    alert("❌ บันทึกฐานข้อมูลใหม่ (RTDB) ไม่สำเร็จ: " + e.message);
     throw e;
   }
 };
