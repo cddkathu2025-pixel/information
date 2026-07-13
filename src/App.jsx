@@ -1271,10 +1271,10 @@ function DashboardApp() {
   const totalBudgetRemaining = totalBudgetReceived - totalBudgetDisbursed;
   const budgetRateOverall = totalBudgetReceived > 0 ? ((totalBudgetDisbursed / totalBudgetReceived) * 100).toFixed(2) : '0';
 
-  const totalKpis = districts.reduce((sum, d) => sum + (d?.kpi?.total || 0), 0);
-  const totalKpisSuccess = districts.reduce((sum, d) => sum + (d?.kpi?.success || 0), 0);
-  const totalKpisInProgress = districts.reduce((sum, d) => sum + (d?.kpi?.inProgress || 0), 0);
-  const totalKpisRisk = districts.reduce((sum, d) => sum + (d?.kpi?.atRisk || 0), 0);
+  const totalKpis = kpis.length;
+  const totalKpisSuccess = kpis.filter(k => parseFloat(k.actual) >= 5).length;
+  const totalKpisInProgress = kpis.filter(k => parseFloat(k.actual) === 3 || parseFloat(k.actual) === 4).length;
+  const totalKpisRisk = kpis.filter(k => parseFloat(k.actual) <= 2).length;
   const kpiRateOverall = totalKpis > 0 ? ((totalKpisSuccess / totalKpis) * 100).toFixed(2) : '0';
 
   // Group filtering and pagination
@@ -2022,9 +2022,11 @@ function DashboardApp() {
                             <td>{k.agency}</td>
                             <td>
                               <span className={`status-badge ${
-                                k.status === 'สำเร็จ' ? 'very-good' : 
-                                k.status === 'ดำเนินการ' ? 'moderate' : 'needs-improvement'
-                              }`}>{k.status}</span>
+                                parseFloat(k.actual) >= 5 ? 'very-good' : 
+                                (parseFloat(k.actual) === 3 || parseFloat(k.actual) === 4) ? 'moderate' : 'needs-improvement'
+                              }`}>
+                                {parseFloat(k.actual) >= 5 ? 'สำเร็จ' : (parseFloat(k.actual) === 3 || parseFloat(k.actual) === 4) ? 'เฝ้าระวัง' : 'วิกฤตล่าช้า'}
+                              </span>
                             </td>
                             <td>
                               <div className="action-buttons" style={{ justifyContent: 'center' }}>
@@ -3061,9 +3063,11 @@ function DashboardApp() {
                               <td>{k.agency}</td>
                               <td>
                                 <span className={`status-badge ${
-                                  k.status === 'สำเร็จ' ? 'very-good' : 
-                                  k.status === 'ดำเนินการ' ? 'moderate' : 'needs-improvement'
-                                }`}>{k.status}</span>
+                                  parseFloat(k.actual) >= 5 ? 'very-good' : 
+                                  (parseFloat(k.actual) === 3 || parseFloat(k.actual) === 4) ? 'moderate' : 'needs-improvement'
+                                }`}>
+                                  {parseFloat(k.actual) >= 5 ? 'สำเร็จ' : (parseFloat(k.actual) === 3 || parseFloat(k.actual) === 4) ? 'เฝ้าระวัง' : 'วิกฤตล่าช้า'}
+                                </span>
                               </td>
                             </tr>
                           ))
