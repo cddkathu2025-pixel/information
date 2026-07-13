@@ -1063,7 +1063,7 @@ function DashboardApp() {
     actual: '',
     unit: '%',
     status: 'ดำเนินการ',
-    district: 'ตำบลกะทู้',
+    weight: '1',
     agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)'
   });
 
@@ -1074,7 +1074,7 @@ function DashboardApp() {
       actual: '',
       unit: '%',
       status: 'ดำเนินการ',
-      district: 'ตำบลกะทู้',
+      weight: '1',
       agency: 'สำนักงานพัฒนาชุมชนอำเภอ (พช.)'
     });
     setModalType('kpi_add');
@@ -1088,7 +1088,7 @@ function DashboardApp() {
       actual: k.actual.toString(),
       unit: k.unit,
       status: k.status,
-      district: k.district,
+      weight: k.weight || '1',
       agency: k.agency
     });
     setModalType('kpi_edit');
@@ -1108,7 +1108,7 @@ function DashboardApp() {
       actual: parseFloat(kpiFormData.actual) || 0,
       unit: kpiFormData.unit,
       status: kpiFormData.status,
-      district: kpiFormData.district,
+      weight: kpiFormData.weight,
       agency: kpiFormData.agency
     };
 
@@ -2004,7 +2004,7 @@ function DashboardApp() {
                           <th>เป้าหมาย</th>
                           <th>ผลสัมฤทธิ์</th>
                           <th>หน่วยวัด</th>
-                          <th>อำเภอ</th>
+                          <th>ค่าน้ำหนัก</th>
                           <th>หน่วยงานรับผิดชอบ</th>
                           <th>สถานะ</th>
                           <th style={{ width: '100px', textAlign: 'center' }}>จัดการ</th>
@@ -2018,7 +2018,7 @@ function DashboardApp() {
                             <td>{k.target}</td>
                             <td>{k.actual}</td>
                             <td>{k.unit}</td>
-                            <td>{k.district}</td>
+                            <td>{k.weight}</td>
                             <td>{k.agency}</td>
                             <td>
                               <span className={`status-badge ${
@@ -2995,6 +2995,45 @@ function DashboardApp() {
                     <h2 className="content-title"><CheckCircle2 size={24} style={{ color: 'var(--primary)' }} /> ตัวชี้วัด (KPI)</h2>
                     <p className="content-subtitle">ติดตามผลสัมฤทธิ์การดำเนินงานตามตัวชี้วัดของสำนักงานพัฒนาชุมชนอำเภอกะทู้</p>
                   </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginBottom: '24px', backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px' }}>
+                    <div className="report-stat-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-card)' }}>
+                      <h3 style={{ fontSize: '14px', marginBottom: '14px' }}>ภาพรวมผลสัมฤทธิ์</h3>
+                      <DonutChart 
+                        segments={[
+                          { value: totalKpisSuccess, total: totalKpis, color: '#10b981' },
+                          { value: totalKpisInProgress, total: totalKpis, color: '#f59e0b' },
+                          { value: totalKpisRisk, total: totalKpis, color: '#ef4444' }
+                        ]}
+                        centerValue={`${kpiRateOverall}%`}
+                        centerLabel="บรรลุแล้ว"
+                      />
+                    </div>
+                    <div className="bar-chart-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <div className="bar-row">
+                        <div className="bar-row-label-row">
+                          <span>🟢 บรรลุเป้าหมายตัวชี้วัด (สำเร็จ)</span>
+                          <span>{totalKpisSuccess} ตัวชี้วัด ({kpiRateOverall}%)</span>
+                        </div>
+                        <div className="bar-track"><div className="bar-fill" style={{ width: `${kpiRateOverall}%`, backgroundColor: '#10b981' }}></div></div>
+                      </div>
+                      <div className="bar-row" style={{ marginTop: '14px' }}>
+                        <div className="bar-row-label-row">
+                          <span>🟡 อยู่ระหว่างเร่งดำเนินงาน (เฝ้าระวัง)</span>
+                          <span>{totalKpisInProgress} ตัวชี้วัด ({((totalKpisInProgress/totalKpis)*100).toFixed(1)}%)</span>
+                        </div>
+                        <div className="bar-track"><div className="bar-fill" style={{ width: `${(totalKpisInProgress/totalKpis)*100}%`, backgroundColor: '#f59e0b' }}></div></div>
+                      </div>
+                      <div className="bar-row" style={{ marginTop: '14px' }}>
+                        <div className="bar-row-label-row">
+                          <span>🔴 เสี่ยงไม่ผ่านตัวชี้วัด (วิกฤตล่าช้า)</span>
+                          <span style={{ color: 'var(--danger)', fontWeight: '700' }}>{totalKpisRisk} ตัวชี้วัด ({((totalKpisRisk/totalKpis)*100).toFixed(1)}%)</span>
+                        </div>
+                        <div className="bar-track"><div className="bar-fill" style={{ width: `${(totalKpisRisk/totalKpis)*100}%`, backgroundColor: '#ef4444' }}></div></div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="data-table-wrapper">
                     <table className="data-table">
                       <thead>
@@ -3004,7 +3043,7 @@ function DashboardApp() {
                           <th>เป้าหมาย</th>
                           <th>ผลสัมฤทธิ์</th>
                           <th>หน่วยวัด</th>
-                          <th>อำเภอ</th>
+                          <th>ค่าน้ำหนัก</th>
                           <th>หน่วยงานรับผิดชอบ</th>
                           <th>สถานะ</th>
                         </tr>
@@ -3018,7 +3057,7 @@ function DashboardApp() {
                               <td>{k.target}</td>
                               <td>{k.actual}</td>
                               <td>{k.unit}</td>
-                              <td>{k.district}</td>
+                              <td>{k.weight}</td>
                               <td>{k.agency}</td>
                               <td>
                                 <span className={`status-badge ${
@@ -4502,10 +4541,8 @@ function DashboardApp() {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>อำเภอพื้นที่</label>
-                    <select className="form-input" value={kpiFormData.district} onChange={e => setKpiFormData({...kpiFormData, district: e.target.value})}>
-                      {DISTRICTS_LIST.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                    <label>ค่าน้ำหนัก</label>
+                    <input type="number" step="0.01" className="form-input" value={kpiFormData.weight} onChange={e => setKpiFormData({...kpiFormData, weight: e.target.value})} />
                   </div>
                   <div className="form-group full-width">
                     <label>หน่วยงานรับผิดชอบ</label>
