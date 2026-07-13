@@ -2967,13 +2967,8 @@ function DashboardApp() {
                     <p className="content-subtitle">ตารางการปฏิบัติงานและกิจกรรมของสำนักงานพัฒนาชุมชนอำเภอกะทู้</p>
                   </div>
                   <div className="dashboard-card" style={{ padding: '0', overflow: 'hidden', height: '600px', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                      <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '10px' }}>
-                        * นี่คือตัวอย่างปฏิทิน คุณสามารถนำโค้ด Embed จาก Google Calendar ของคุณมาใส่แทนที่ได้
-                      </p>
-                    </div>
                     <iframe 
-                      src="https://calendar.google.com/calendar/embed?src=th.th%23holiday%40group.v.calendar.google.com&ctz=Asia%2FBangkok" 
+                      src="https://calendar.google.com/calendar/embed?src=cddkathu69%40gmail.com&ctz=Asia%2FBangkok" 
                       style={{ border: 0, width: '100%', height: '100%', flex: 1 }} 
                       frameBorder="0" 
                       scrolling="no"
