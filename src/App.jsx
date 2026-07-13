@@ -2962,9 +2962,20 @@ function DashboardApp() {
               {/* PAGE 2: KPI DASHBOARD */}
               {activeMenu === 'ปฏิทินงาน' && (
                 <div className="fade-in">
-                  <div className="content-header">
-                    <h2 className="content-title"><Calendar size={24} style={{ color: 'var(--primary)' }} /> ปฏิทินปฏิบัติงาน</h2>
-                    <p className="content-subtitle">ตารางการปฏิบัติงานและกิจกรรมของสำนักงานพัฒนาชุมชนอำเภอกะทู้</p>
+                  <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+                    <div>
+                      <h2 className="content-title"><Calendar size={24} style={{ color: 'var(--primary)' }} /> ปฏิทินปฏิบัติงาน</h2>
+                      <p className="content-subtitle">ตารางการปฏิบัติงานและกิจกรรมของสำนักงานพัฒนาชุมชนอำเภอกะทู้</p>
+                    </div>
+                    <a 
+                      href="https://script.google.com/macros/s/AKfycbzJNDKCWATcLeDzN-Hq8HyqpAI7DMFYe9ibEnzIhZc1Ap9oF6bfVZRXakUfMaxjF9ja/exec" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="btn-add-new" 
+                      style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}
+                    >
+                      <Plus size={16} /> เพิ่มตารางงาน
+                    </a>
                   </div>
                   <div className="dashboard-card" style={{ padding: '0', overflow: 'hidden', height: '600px', display: 'flex', flexDirection: 'column' }}>
                     <iframe 
