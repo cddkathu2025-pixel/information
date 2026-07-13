@@ -2991,82 +2991,49 @@ function DashboardApp() {
 
               {activeMenu === 'ตัวชี้วัด' && (
                 <div className="dashboard-card">
-                  <div className="page-tabs-bar">
-                    <button className={`tab-btn ${kpiTab === 'overall' ? 'active' : ''}`} onClick={async () => setKpiTab('overall')}>ตัวชี้วัดรวมอำเภอกะทู้</button>
-                    <button className={`tab-btn ${kpiTab === 'ranking' ? 'active' : ''}`} onClick={async () => setKpiTab('ranking')}>จัดลำดับผลสัมฤทธิ์ตำบล</button>
+                  <div className="content-header" style={{ marginBottom: '16px' }}>
+                    <h2 className="content-title"><CheckCircle2 size={24} style={{ color: 'var(--primary)' }} /> ตัวชี้วัด (KPI)</h2>
+                    <p className="content-subtitle">ติดตามผลสัมฤทธิ์การดำเนินงานตามตัวชี้วัดของสำนักงานพัฒนาชุมชนอำเภอกะทู้</p>
                   </div>
-                  {kpiTab === 'overall' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginTop: '10px' }}>
-                      <div className="report-stat-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <h3 style={{ fontSize: '13px' }}>เป้าหมายอำเภอ</h3>
-                        <div style={{ margin: '14px 0' }}>
-                          <DonutChart 
-                            segments={[
-                              { value: totalKpisSuccess, total: totalKpis, color: '#10b981' },
-                              { value: totalKpisInProgress, total: totalKpis, color: '#f59e0b' },
-                              { value: totalKpisRisk, total: totalKpis, color: '#ef4444' }
-                            ]}
-                            centerValue={`${kpiRateOverall}%`}
-                            centerLabel="KPI บรรลุแล้ว"
-                          />
-                        </div>
-                      </div>
-                      <div className="bar-chart-container">
-                        <div className="bar-row">
-                          <div className="bar-row-label-row">
-                            <span>🟢 บรรลุเป้าหมายตัวชี้วัด (สำเร็จ)</span>
-                            <span>{totalKpisSuccess} ตัวชี้วัด ({kpiRateOverall}%)</span>
-                          </div>
-                          <div className="bar-track"><div className="bar-fill" style={{ width: `${kpiRateOverall}%`, backgroundColor: '#10b981' }}></div></div>
-                        </div>
-                        <div className="bar-row">
-                          <div className="bar-row-label-row">
-                            <span>🟡 อยู่ระหว่างเร่งดำเนินงาน (เฝ้าระวัง)</span>
-                            <span>{totalKpisInProgress} ตัวชี้วัด ({((totalKpisInProgress/totalKpis)*100).toFixed(1)}%)</span>
-                          </div>
-                          <div className="bar-track"><div className="bar-fill" style={{ width: `${(totalKpisInProgress/totalKpis)*100}%`, backgroundColor: '#f59e0b' }}></div></div>
-                        </div>
-                        <div className="bar-row">
-                          <div className="bar-row-label-row">
-                            <span>🔴 เสี่ยงไม่ผ่านตัวชี้วัด (วิกฤตล่าช้า)</span>
-                            <span style={{ color: 'var(--danger)', fontWeight: '700' }}>{totalKpisRisk} ตัวชี้วัด ({((totalKpisRisk/totalKpis)*100).toFixed(1)}%)</span>
-                          </div>
-                          <div className="bar-track"><div className="bar-fill" style={{ width: `${(totalKpisRisk/totalKpis)*100}%`, backgroundColor: '#ef4444' }}></div></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {kpiTab === 'ranking' && (
-                    <table className="summary-table" style={{ marginTop: '10px' }}>
+                  <div className="data-table-wrapper">
+                    <table className="data-table">
                       <thead>
                         <tr>
-                          <th>อันดับ</th>
-                          <th>ตำบล</th>
-                          <th>ผ่านเป้าตัวชี้วัด</th>
-                          <th>มีความเสี่ยงล่าช้า</th>
-                          <th>อัตราผลสำเร็จตัวชี้วัด</th>
-                          <th>ความก้าวหน้า</th>
+                          <th>ลำดับ</th>
+                          <th>ชื่อตัวชี้วัด</th>
+                          <th>เป้าหมาย</th>
+                          <th>ผลสัมฤทธิ์</th>
+                          <th>หน่วยวัด</th>
+                          <th>อำเภอ</th>
+                          <th>หน่วยงานรับผิดชอบ</th>
+                          <th>สถานะ</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {[...districts].sort((a,b) => ((b?.kpi?.success || 0)/(b?.kpi?.total || 1)) - ((a?.kpi?.success || 0)/(a?.kpi?.total || 1))).map((d, idx) => {
-                          const rate = d?.kpi?.total > 0 ? (d.kpi.success/d.kpi.total)*100 : 0;
-                          return (
-                            <tr key={idx}>
-                              <td>{idx+1}</td>
-                              <td style={{ fontWeight: '700' }}>{d?.name}</td>
-                              <td>{d?.kpi?.success} KPI</td>
-                              <td style={{ color: d?.kpi?.atRisk > 0 ? 'var(--danger)' : 'inherit' }}>{d?.kpi?.atRisk} KPI</td>
-                              <td>{rate.toFixed(1)}%</td>
-                              <td style={{ width: '150px' }}>
-                                <div className="bar-track" style={{ height: '6px' }}><div className="bar-fill" style={{ width: `${rate}%`, backgroundColor: '#10b981' }}></div></div>
+                        {kpis.length > 0 ? (
+                          kpis.map((k, idx) => (
+                            <tr key={k.id}>
+                              <td>{idx + 1}</td>
+                              <td style={{ fontWeight: '700' }}>{k.name}</td>
+                              <td>{k.target}</td>
+                              <td>{k.actual}</td>
+                              <td>{k.unit}</td>
+                              <td>{k.district}</td>
+                              <td>{k.agency}</td>
+                              <td>
+                                <span className={`status-badge ${
+                                  k.status === 'สำเร็จ' ? 'very-good' : 
+                                  k.status === 'ดำเนินการ' ? 'moderate' : 'needs-improvement'
+                                }`}>{k.status}</span>
                               </td>
                             </tr>
-                          );
-                        })}
+                          ))
+                        ) : (
+                          <tr><td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>ไม่มีข้อมูลตัวชี้วัด</td></tr>
+                        )}
                       </tbody>
                     </table>
-                  )}
+                  </div>
                 </div>
               )}
 
