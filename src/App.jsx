@@ -328,6 +328,7 @@ function DashboardApp() {
     return 'ไตรมาส 4';
   };
   const [budgetQuarterFilter, setBudgetQuarterFilter] = useState(getCurrentQuarter()); // 'ทั้งหมด', 'ไตรมาส 1', 'ไตรมาส 2', 'ไตรมาส 3', 'ไตรมาส 4'
+  const [budgetTypeFilter, setBudgetTypeFilter] = useState('ทั้งหมด'); // 'ทั้งหมด', 'งบบริหาร', 'โครงการยุทธศาสตร์', 'กองทุนพัฒนาบทบาทสตรี'
   const [basicInfoTab, setBasicInfoTab] = useState('demographics'); // 'demographics', 'economy'
   const [specialTab, setSpecialTab] = useState('women'); // 'women', 'tpmap'
   const [adminTab, setAdminTab] = useState('groups'); // 'groups', 'projects', 'districts'
@@ -3182,6 +3183,15 @@ function DashboardApp() {
                         </div>
                       </div>
                       
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <h3 className="report-section-title" style={{ margin: 0 }}>รายการงบประมาณ</h3>
+                        <select className="filter-select" style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px' }} value={budgetTypeFilter} onChange={e => setBudgetTypeFilter(e.target.value)}>
+                          <option value="ทั้งหมด">ประเภทงบประมาณทั้งหมด</option>
+                          <option value="งบบริหาร">งบบริหาร</option>
+                          <option value="โครงการยุทธศาสตร์">โครงการยุทธศาสตร์</option>
+                          <option value="กองทุนพัฒนาบทบาทสตรี">กองทุนพัฒนาบทบาทสตรี</option>
+                        </select>
+                      </div>
                       <table className="summary-table">
                         <thead>
                           <tr>
@@ -3193,7 +3203,7 @@ function DashboardApp() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredMonthlyBudgets.map((b, idx) => {
+                          {filteredMonthlyBudgets.filter(b => budgetTypeFilter === 'ทั้งหมด' || b.budgetType === budgetTypeFilter || (budgetTypeFilter === 'โครงการยุทธศาสตร์' && !b.budgetType)).map((b, idx) => {
                             const isFuture = b.actual === 0 && b.status === 'ยังไม่เบิกจ่าย';
                             const target = parseFloat(b.target) || 0;
                             
