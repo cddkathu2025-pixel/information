@@ -320,6 +320,7 @@ function DashboardApp() {
   // Tab states
   const [kpiTab, setKpiTab] = useState('overall'); // 'overall', 'ranking'
   const [budgetTab, setBudgetTab] = useState('financial'); // 'financial', 'monthly'
+  const [budgetQuarterFilter, setBudgetQuarterFilter] = useState('ทั้งหมด'); // 'ทั้งหมด', 'ไตรมาส 1', 'ไตรมาส 2', 'ไตรมาส 3', 'ไตรมาส 4'
   const [basicInfoTab, setBasicInfoTab] = useState('demographics'); // 'demographics', 'economy'
   const [specialTab, setSpecialTab] = useState('women'); // 'women', 'tpmap'
   const [adminTab, setAdminTab] = useState('groups'); // 'groups', 'projects', 'districts'
@@ -1254,19 +1255,33 @@ function DashboardApp() {
   const totalPop = districts.reduce((sum, d) => sum + (d?.population?.male || 0) + (d?.population?.female || 0), 0);
   const totalOtopProducers = districts.reduce((sum, d) => sum + (d?.economy?.otopProducers || 0), 0);
   
-  const strategyBudgets = monthlyBudgets.filter(b => b.budgetType === 'โครงการยุทธศาสตร์' || !b.budgetType);
+  const filteredMonthlyBudgets = monthlyBudgets.filter(b => {
+    if (budgetQuarterFilter === 'ทั้งหมด') return true;
+    const q1 = ['ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const q2 = ['ม.ค.', 'ก.พ.', 'มี.ค.'];
+    const q3 = ['เม.ย.', 'พ.ค.', 'มิ.ย.'];
+    const q4 = ['ก.ค.', 'ส.ค.', 'ก.ย.'];
+    
+    if (budgetQuarterFilter === 'ไตรมาส 1') return q1.includes(b.month);
+    if (budgetQuarterFilter === 'ไตรมาส 2') return q2.includes(b.month);
+    if (budgetQuarterFilter === 'ไตรมาส 3') return q3.includes(b.month);
+    if (budgetQuarterFilter === 'ไตรมาส 4') return q4.includes(b.month);
+    return true;
+  });
+
+  const strategyBudgets = filteredMonthlyBudgets.filter(b => b.budgetType === 'โครงการยุทธศาสตร์' || !b.budgetType);
   const totalStrategyReceived = strategyBudgets.reduce((sum, b) => sum + (parseFloat(b.target) || 0), 0);
   const totalStrategyDisbursed = strategyBudgets.reduce((sum, b) => sum + (parseFloat(b.actual) || 0), 0);
   const totalStrategyRemaining = totalStrategyReceived - totalStrategyDisbursed;
   const strategyRateOverall = totalStrategyReceived > 0 ? ((totalStrategyDisbursed / totalStrategyReceived) * 100).toFixed(2) : '0';
 
-  const womenBudgets = monthlyBudgets.filter(b => b.budgetType === 'กองทุนพัฒนาบทบาทสตรี');
+  const womenBudgets = filteredMonthlyBudgets.filter(b => b.budgetType === 'กองทุนพัฒนาบทบาทสตรี');
   const totalWomenReceived = womenBudgets.reduce((sum, b) => sum + (parseFloat(b.target) || 0), 0);
   const totalWomenDisbursed = womenBudgets.reduce((sum, b) => sum + (parseFloat(b.actual) || 0), 0);
   const totalWomenRemaining = totalWomenReceived - totalWomenDisbursed;
   const womenRateOverall = totalWomenReceived > 0 ? ((totalWomenDisbursed / totalWomenReceived) * 100).toFixed(2) : '0';
 
-  const adminBudgets = monthlyBudgets.filter(b => b.budgetType === 'งบบริหาร');
+  const adminBudgets = filteredMonthlyBudgets.filter(b => b.budgetType === 'งบบริหาร');
   const totalAdminReceived = adminBudgets.reduce((sum, b) => sum + (parseFloat(b.target) || 0), 0);
   const totalAdminDisbursed = adminBudgets.reduce((sum, b) => sum + (parseFloat(b.actual) || 0), 0);
   const totalAdminRemaining = totalAdminReceived - totalAdminDisbursed;
@@ -3089,9 +3104,20 @@ function DashboardApp() {
               {/* PAGE 3: BUDGET */}
               {activeMenu === 'งบประมาณ' && (
                 <div className="dashboard-card">
-                  <div className="page-tabs-bar">
-                    <button className={`tab-btn ${budgetTab === 'financial' ? 'active' : ''}`} onClick={async () => setBudgetTab('financial')}>สรุปการเงินอำเภอกะทู้</button>
-                    <button className={`tab-btn ${budgetTab === 'monthly' ? 'active' : ''}`} onClick={async () => setBudgetTab('monthly')}>เบิกจ่ายเทียบเป้าสะสม</button>
+                  <div className="page-tabs-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <button className={`tab-btn ${budgetTab === 'financial' ? 'active' : ''}`} onClick={async () => setBudgetTab('financial')}>สรุปการเงินอำเภอกะทู้</button>
+                      <button className={`tab-btn ${budgetTab === 'monthly' ? 'active' : ''}`} onClick={async () => setBudgetTab('monthly')}>เบิกจ่ายเทียบเป้าสะสม</button>
+                    </div>
+                    <div style={{ paddingRight: '12px' }}>
+                      <select className="filter-select" style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px' }} value={budgetQuarterFilter} onChange={e => setBudgetQuarterFilter(e.target.value)}>
+                        <option value="ทั้งหมด">แสดงทุกไตรมาส</option>
+                        <option value="ไตรมาส 1">ไตรมาส 1 (ต.ค. - ธ.ค.)</option>
+                        <option value="ไตรมาส 2">ไตรมาส 2 (ม.ค. - มี.ค.)</option>
+                        <option value="ไตรมาส 3">ไตรมาส 3 (เม.ย. - มิ.ย.)</option>
+                        <option value="ไตรมาส 4">ไตรมาส 4 (ก.ค. - ก.ย.)</option>
+                      </select>
+                    </div>
                   </div>
                   {budgetTab === 'financial' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
@@ -3105,7 +3131,7 @@ function DashboardApp() {
                         <div className="summary-card">
                           <div className="card-details">
                             <span className="card-label">✅ งบกองทุนพัฒนาบทบาทสตรี</span>
-                            <span className="card-value">{formatCurrency(monthlyBudgets.filter(b => b.budgetType === 'กองทุนพัฒนาบทบาทสตรี').reduce((sum, b) => sum + (parseFloat(b.target) || 0), 0))} บาท</span>
+                            <span className="card-value">{formatCurrency(filteredMonthlyBudgets.filter(b => b.budgetType === 'กองทุนพัฒนาบทบาทสตรี').reduce((sum, b) => sum + (parseFloat(b.target) || 0), 0))} บาท</span>
                           </div>
                         </div>
                         <div className="summary-card">
@@ -3160,7 +3186,7 @@ function DashboardApp() {
                           </tr>
                         </thead>
                         <tbody>
-                          {monthlyBudgets.map((b, idx) => {
+                          {filteredMonthlyBudgets.map((b, idx) => {
                             const isFuture = b.actual === 0 && b.status === 'ยังไม่เบิกจ่าย';
                             const target = parseFloat(b.target) || 0;
                             
@@ -3185,7 +3211,7 @@ function DashboardApp() {
                   )}
                   {budgetTab === 'monthly' && (
                     <div className="bar-chart-container" style={{ marginTop: '10px' }}>
-                      {monthlyBudgets.filter(b => b.actual > 0).map((b, idx) => (
+                      {filteredMonthlyBudgets.filter(b => b.actual > 0).map((b, idx) => (
                         <div className="bar-row" key={idx}>
                           <div className="bar-row-label-row">
                             <span className="bar-row-title">{b.month} (เบิกสะสม)</span>
