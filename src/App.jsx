@@ -320,7 +320,14 @@ function DashboardApp() {
   // Tab states
   const [kpiTab, setKpiTab] = useState('overall'); // 'overall', 'ranking'
   const [budgetTab, setBudgetTab] = useState('financial'); // 'financial', 'monthly'
-  const [budgetQuarterFilter, setBudgetQuarterFilter] = useState('ทั้งหมด'); // 'ทั้งหมด', 'ไตรมาส 1', 'ไตรมาส 2', 'ไตรมาส 3', 'ไตรมาส 4'
+  const getCurrentQuarter = () => {
+    const m = new Date().getMonth();
+    if (m >= 9 && m <= 11) return 'ไตรมาส 1';
+    if (m >= 0 && m <= 2) return 'ไตรมาส 2';
+    if (m >= 3 && m <= 5) return 'ไตรมาส 3';
+    return 'ไตรมาส 4';
+  };
+  const [budgetQuarterFilter, setBudgetQuarterFilter] = useState(getCurrentQuarter()); // 'ทั้งหมด', 'ไตรมาส 1', 'ไตรมาส 2', 'ไตรมาส 3', 'ไตรมาส 4'
   const [basicInfoTab, setBasicInfoTab] = useState('demographics'); // 'demographics', 'economy'
   const [specialTab, setSpecialTab] = useState('women'); // 'women', 'tpmap'
   const [adminTab, setAdminTab] = useState('groups'); // 'groups', 'projects', 'districts'
