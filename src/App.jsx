@@ -1510,7 +1510,7 @@ function DashboardApp() {
               onClick={async () => { setActiveMenu('ข้อมูลพื้นฐาน'); setIsAdminMode(false); }}
             >
               <Users size={18} />
-              <span className="menu-item-text">ข้อมูลพื้นฐานประชากร</span>
+              <span className="menu-item-text">ข้อมูลพื้นฐาน</span>
             </div>
           </li>
 
@@ -3248,6 +3248,7 @@ function DashboardApp() {
                   <div className="page-tabs-bar">
                     <button className={`tab-btn ${basicInfoTab === 'demographics' ? 'active' : ''}`} onClick={async () => setBasicInfoTab('demographics')}>กลุ่มประชากรเปราะบาง</button>
                     <button className={`tab-btn ${basicInfoTab === 'economy' ? 'active' : ''}`} onClick={async () => setBasicInfoTab('economy')}>เศรษฐกิจและรายได้เฉลี่ย</button>
+                    <button className={`tab-btn ${basicInfoTab === 'villages' ? 'active' : ''}`} onClick={async () => setBasicInfoTab('villages')}>ข้อมูลหมู่บ้าน/ชุมชน</button>
                   </div>
                   {basicInfoTab === 'demographics' && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
@@ -3302,6 +3303,43 @@ function DashboardApp() {
                           <div className="bar-track"><div className="bar-fill" style={{ width: `${((d?.economy?.avgIncome || 0)/150000)*100}%`, backgroundColor: (d?.economy?.avgIncome || 0) < 100000 ? '#ea580c' : '#2563eb' }}></div></div>
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {basicInfoTab === 'villages' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
+                      <div className="summary-cards-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+                        <div className="summary-card">
+                          <div className="card-details">
+                            <span className="card-label">🏠 จำนวนหมู่บ้านทั้งหมด</span>
+                            <span className="card-value">{formatCurrency(districts.reduce((sum, d) => sum + (d?.villages || 0), 0))} หมู่บ้าน</span>
+                          </div>
+                        </div>
+                        <div className="summary-card">
+                          <div className="card-details">
+                            <span className="card-label">👨‍👩‍👧‍👦 จำนวนครัวเรือนจดทะเบียนทั้งหมด</span>
+                            <span className="card-value">{formatCurrency(districts.reduce((sum, d) => sum + (d?.households || 0), 0))} ครัวเรือน</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <table className="summary-table">
+                        <thead>
+                          <tr>
+                            <th>ตำบล</th>
+                            <th>จำนวนหมู่บ้าน</th>
+                            <th>จำนวนครัวเรือน (จดทะเบียน)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {districts.map((d, idx) => (
+                            <tr key={idx}>
+                              <td style={{ fontWeight: 'bold' }}>{d.name}</td>
+                              <td>{formatCurrency(d.villages)} หมู่บ้าน</td>
+                              <td>{formatCurrency(d.households)} ครัวเรือน</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>
