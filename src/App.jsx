@@ -1266,8 +1266,14 @@ function DashboardApp() {
   const totalWomenRemaining = totalWomenReceived - totalWomenDisbursed;
   const womenRateOverall = totalWomenReceived > 0 ? ((totalWomenDisbursed / totalWomenReceived) * 100).toFixed(2) : '0';
 
-  const totalBudgetReceived = totalStrategyReceived + totalWomenReceived;
-  const totalBudgetDisbursed = totalStrategyDisbursed + totalWomenDisbursed;
+  const adminBudgets = monthlyBudgets.filter(b => b.budgetType === 'งบบริหาร');
+  const totalAdminReceived = adminBudgets.reduce((sum, b) => sum + (parseFloat(b.target) || 0), 0);
+  const totalAdminDisbursed = adminBudgets.reduce((sum, b) => sum + (parseFloat(b.actual) || 0), 0);
+  const totalAdminRemaining = totalAdminReceived - totalAdminDisbursed;
+  const adminRateOverall = totalAdminReceived > 0 ? ((totalAdminDisbursed / totalAdminReceived) * 100).toFixed(2) : '0';
+
+  const totalBudgetReceived = totalStrategyReceived + totalWomenReceived + totalAdminReceived;
+  const totalBudgetDisbursed = totalStrategyDisbursed + totalWomenDisbursed + totalAdminDisbursed;
   const totalBudgetRemaining = totalBudgetReceived - totalBudgetDisbursed;
   const budgetRateOverall = totalBudgetReceived > 0 ? ((totalBudgetDisbursed / totalBudgetReceived) * 100).toFixed(2) : '0';
 
@@ -3116,6 +3122,33 @@ function DashboardApp() {
                         </div>
                       </div>
                       
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '24px' }}>
+                        <div className="report-stat-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <h3 style={{ fontSize: '14px', marginBottom: '14px' }}>งบยุทธศาสตร์</h3>
+                          <DonutChart 
+                            segments={[{ value: totalStrategyDisbursed, total: totalStrategyReceived, color: '#3b82f6' }]}
+                            centerValue={`${strategyRateOverall}%`}
+                            centerLabel="เบิกจ่ายแล้ว"
+                          />
+                        </div>
+                        <div className="report-stat-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <h3 style={{ fontSize: '14px', marginBottom: '14px' }}>งบบริหาร</h3>
+                          <DonutChart 
+                            segments={[{ value: totalAdminDisbursed, total: totalAdminReceived, color: '#8b5cf6' }]}
+                            centerValue={`${adminRateOverall}%`}
+                            centerLabel="เบิกจ่ายแล้ว"
+                          />
+                        </div>
+                        <div className="report-stat-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <h3 style={{ fontSize: '14px', marginBottom: '14px' }}>งบกองทุนพัฒนาบทบาทสตรี</h3>
+                          <DonutChart 
+                            segments={[{ value: totalWomenDisbursed, total: totalWomenReceived, color: '#ec4899' }]}
+                            centerValue={`${womenRateOverall}%`}
+                            centerLabel="เบิกจ่ายแล้ว"
+                          />
+                        </div>
+                      </div>
+                      
                       <table className="summary-table">
                         <thead>
                           <tr>
@@ -4269,6 +4302,7 @@ function DashboardApp() {
                     <label>ประเภทงบประมาณ <span className="required">*</span></label>
                     <select className="form-input" required value={budgetFormData.budgetType} onChange={e => setBudgetFormData({...budgetFormData, budgetType: e.target.value})}>
                       <option value="โครงการยุทธศาสตร์">โครงการยุทธศาสตร์</option>
+                      <option value="งบบริหาร">งบบริหาร</option>
                       <option value="กองทุนพัฒนาบทบาทสตรี">กองทุนพัฒนาบทบาทสตรี</option>
                     </select>
                   </div>
