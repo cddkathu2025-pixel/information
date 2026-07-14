@@ -342,7 +342,7 @@ function DashboardApp() {
   const [groupTypes, setGroupTypes] = useState(() => getGroupTypes());
   const [reports, setReports] = useState(() => getReports());
   const [leaders, setLeaders] = useState(() => getLeaders());
-  const [leaderForm, setLeaderForm] = useState({ id: '', name: '', village: '', position: '', subdistrict: 'กะทู้', district: 'กะทู้', phone: '' });
+  const [leaderForm, setLeaderForm] = useState({ id: '', name: '', moo: '', villageName: '', position: '', subdistrict: 'กะทู้', district: 'กะทู้', phone: '' });
   const [filterSubdistrict, setFilterSubdistrict] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKPI, setSelectedKPI] = useState(null);
@@ -2214,7 +2214,8 @@ function DashboardApp() {
                             <tr>
                               <th>ชื่อ-สกุล</th>
                               <th>ตำแหน่ง</th>
-                              <th>หมู่/ชุมชน</th>
+                              <th>หมู่ที่</th>
+                              <th>ชื่อหมู่บ้าน/ชุมชน</th>
                               <th>ตำบล</th>
                               <th>เบอร์โทรศัพท์</th>
                               <th style={{ width: '100px', textAlign: 'center' }}>จัดการ</th>
@@ -2225,7 +2226,8 @@ function DashboardApp() {
                               <tr key={leader.id || index}>
                                 <td>{leader.name}</td>
                                 <td>{leader.position}</td>
-                                <td>{leader.village}</td>
+                                <td>{leader.moo}</td>
+                                <td>{leader.villageName}</td>
                                 <td>{leader.subdistrict}</td>
                                 <td>{leader.phone}</td>
                                 <td style={{ textAlign: 'center' }}>
@@ -2772,7 +2774,8 @@ function DashboardApp() {
                           <tr>
                             <th>ชื่อ-สกุล</th>
                             <th>ตำแหน่ง</th>
-                            <th>หมู่/ชุมชน</th>
+                            <th>หมู่ที่</th>
+                            <th>ชื่อหมู่บ้าน/ชุมชน</th>
                             <th>ตำบล</th>
                             <th>อำเภอ</th>
                             <th>เบอร์โทรศัพท์</th>
@@ -2780,19 +2783,20 @@ function DashboardApp() {
                         </thead>
                         <tbody>
                           {leaders
-                            .filter(l => (!filterSubdistrict || l.subdistrict === filterSubdistrict) && (!searchTerm || l.name.includes(searchTerm) || l.village.includes(searchTerm) || l.position.includes(searchTerm)))
+                            .filter(l => (!filterSubdistrict || l.subdistrict === filterSubdistrict) && (!searchTerm || l.name.includes(searchTerm) || (l.moo && l.moo.includes(searchTerm)) || (l.villageName && l.villageName.includes(searchTerm)) || l.position.includes(searchTerm)))
                             .map((leader, i) => (
                             <tr key={leader.id || i}>
                               <td style={{ fontWeight: '500' }}>{leader.name}</td>
                               <td><span className="status-badge status-in-progress">{leader.position}</span></td>
-                              <td>{leader.village}</td>
+                              <td>{leader.moo}</td>
+                              <td>{leader.villageName}</td>
                               <td>{leader.subdistrict}</td>
                               <td>{leader.district}</td>
                               <td><a href={`tel:${leader.phone}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>📞 {leader.phone}</a></td>
                             </tr>
                           ))}
                           {leaders.length === 0 && (
-                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>ยังไม่มีข้อมูลผู้นำชุมชน</td></tr>
+                            <tr><td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>ยังไม่มีข้อมูลผู้นำชุมชน</td></tr>
                           )}
                         </tbody>
                       </table>
@@ -3322,24 +3326,58 @@ function DashboardApp() {
                         </div>
                       </div>
                       
-                      <table className="summary-table">
-                        <thead>
-                          <tr>
-                            <th>ตำบล</th>
-                            <th>จำนวนหมู่บ้าน</th>
-                            <th>จำนวนครัวเรือน (จดทะเบียน)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {districts.map((d, idx) => (
-                            <tr key={idx}>
-                              <td style={{ fontWeight: 'bold' }}>{d.name}</td>
-                              <td>{formatCurrency(d.villages)} หมู่บ้าน</td>
-                              <td>{formatCurrency(d.households)} ครัวเรือน</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+                        <div>
+                          <h3 className="report-section-title" style={{ marginBottom: '10px' }}>สรุปจำนวนตามตำบล</h3>
+                          <table className="summary-table">
+                            <thead>
+                              <tr>
+                                <th>ตำบล</th>
+                                <th>จำนวนหมู่บ้าน</th>
+                                <th>จำนวนครัวเรือน (จดทะเบียน)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {districts.map((d, idx) => (
+                                <tr key={idx}>
+                                  <td style={{ fontWeight: 'bold' }}>{d.name}</td>
+                                  <td>{formatCurrency(d.villages)} หมู่บ้าน</td>
+                                  <td>{formatCurrency(d.households)} ครัวเรือน</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div>
+                          <h3 className="report-section-title" style={{ marginBottom: '10px' }}>รายชื่อหมู่บ้าน/ชุมชน</h3>
+                          <table className="summary-table">
+                            <thead>
+                              <tr>
+                                <th>หมู่ที่</th>
+                                <th>ชื่อหมู่บ้าน/ชุมชน</th>
+                                <th>ตำบล</th>
+                                <th>ผู้นำชุมชน</th>
+                                <th>เบอร์โทรศัพท์</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {leaders.map((leader, idx) => (
+                                <tr key={leader.id || idx}>
+                                  <td>{leader.moo}</td>
+                                  <td style={{ fontWeight: 'bold' }}>{leader.villageName}</td>
+                                  <td>{leader.subdistrict}</td>
+                                  <td>{leader.name}</td>
+                                  <td>{leader.phone ? <a href={`tel:${leader.phone}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{leader.phone}</a> : '-'}</td>
+                                </tr>
+                              ))}
+                              {leaders.length === 0 && (
+                                <tr><td colSpan="5" style={{ textAlign: 'center', color: '#64748b' }}>ยังไม่มีข้อมูลหมู่บ้าน/ชุมชน</td></tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -4247,9 +4285,15 @@ function DashboardApp() {
                   <label className="form-label">ตำแหน่ง <span className="required">*</span></label>
                   <input type="text" className="form-input" required value={leaderForm.position} onChange={e => setLeaderForm({...leaderForm, position: e.target.value})} placeholder="เช่น ผู้ใหญ่บ้าน, กำนัน" />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">หมู่/ชุมชน <span className="required">*</span></label>
-                  <input type="text" className="form-input" required value={leaderForm.village} onChange={e => setLeaderForm({...leaderForm, village: e.target.value})} placeholder="เช่น หมู่ 1 บ้านทุ่งทอง" />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '15px' }}>
+                  <div className="form-group">
+                    <label className="form-label">หมู่ที่ <span className="required">*</span></label>
+                    <input type="text" className="form-input" required value={leaderForm.moo} onChange={e => setLeaderForm({...leaderForm, moo: e.target.value})} placeholder="เช่น 1" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">ชื่อหมู่บ้าน/ชุมชน <span className="required">*</span></label>
+                    <input type="text" className="form-input" required value={leaderForm.villageName} onChange={e => setLeaderForm({...leaderForm, villageName: e.target.value})} placeholder="เช่น บ้านทุ่งทอง" />
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="form-group">
