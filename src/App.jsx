@@ -344,6 +344,7 @@ function DashboardApp() {
   const [leaders, setLeaders] = useState(() => getLeaders());
   const [leaderForm, setLeaderForm] = useState({ id: '', name: '', moo: '', villageName: '', position: '', subdistrict: 'กะทู้', district: 'กะทู้', phone: '' });
   const [filterSubdistrict, setFilterSubdistrict] = useState('');
+  const [villageFilter, setVillageFilter] = useState('ทั้งหมด');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKPI, setSelectedKPI] = useState(null);
   
@@ -3350,7 +3351,15 @@ function DashboardApp() {
                         </div>
 
                         <div>
-                          <h3 className="report-section-title" style={{ marginBottom: '10px' }}>รายชื่อหมู่บ้าน/ชุมชน</h3>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <h3 className="report-section-title" style={{ margin: 0 }}>รายชื่อหมู่บ้าน/ชุมชน</h3>
+                            <select className="filter-select" style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px' }} value={villageFilter} onChange={e => setVillageFilter(e.target.value)}>
+                              <option value="ทั้งหมด">ทุกตำบล</option>
+                              <option value="กะทู้">ตำบลกะทู้</option>
+                              <option value="ป่าตอง">ตำบลป่าตอง</option>
+                              <option value="กมลา">ตำบลกมลา</option>
+                            </select>
+                          </div>
                           <table className="summary-table">
                             <thead>
                               <tr>
@@ -3362,7 +3371,9 @@ function DashboardApp() {
                               </tr>
                             </thead>
                             <tbody>
-                              {leaders.map((leader, idx) => (
+                              {leaders
+                                .filter(l => villageFilter === 'ทั้งหมด' || l.subdistrict === villageFilter.replace('ตำบล', ''))
+                                .map((leader, idx) => (
                                 <tr key={leader.id || idx}>
                                   <td>{leader.moo}</td>
                                   <td style={{ fontWeight: 'bold' }}>{leader.villageName}</td>
