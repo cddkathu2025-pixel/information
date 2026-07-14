@@ -1730,7 +1730,7 @@ function DashboardApp() {
                   🏷️ จัดการประเภทกลุ่ม ({groupTypes.length})
                 </button>
                 <button className={`tab-btn ${adminTab === 'districts' ? 'active' : ''}`} onClick={async () => setAdminTab('districts')}>
-                  📍 ปรับปรุงสถิติรายตำบล (3)
+                  📍 ข้อมูลตำบล/พื้นฐาน (3)
                 </button>
                 <button className={`tab-btn ${adminTab === 'reports' ? 'active' : ''}`} onClick={async () => setAdminTab('reports')}>
                   📝 ติดตามส่งรายงาน ({reports.length})
