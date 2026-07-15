@@ -67,6 +67,7 @@ const AI_QUESTIONS_KEY = 'ecc_ai_questions_db';
 const OTOP_PRODUCTS_KEY = 'ecc_otop_products_db';
 const GROUP_TYPES_KEY = 'ecc_group_types_db';
 const LEADERS_KEY = 'communityLeaders';
+const PLACES_KEY = 'ecc_gis_places';
 
 export const DISTRICTS_LIST = [
   'ตำบลกะทู้',
@@ -620,6 +621,16 @@ export function getLeaders() {
 
 export async function saveLeaders(leaders) {
   await saveToFirebase(LEADERS_KEY, leaders);
+}
+
+// --- GIS Places ---
+export function getPlaces() {
+  const data = getFromFirebaseCache(PLACES_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export async function savePlaces(places) {
+  await saveToFirebase(PLACES_KEY, places);
 }
 
 export async function addDocument(document) {

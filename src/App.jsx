@@ -1,5 +1,7 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
 import { db, rtdb, auth } from './firebase';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import {
@@ -87,6 +89,8 @@ import {
   getDocuments,
   getLeaders,
   saveLeaders,
+  getPlaces,
+  savePlaces,
   addDocument,
   updateDocument,
   deleteDocument
@@ -342,6 +346,8 @@ function DashboardApp() {
   const [groupTypes, setGroupTypes] = useState(() => getGroupTypes());
   const [reports, setReports] = useState(() => getReports());
   const [leaders, setLeaders] = useState(() => getLeaders());
+  const [places, setPlaces] = useState(() => getPlaces());
+  const [placeForm, setPlaceForm] = useState({ id: '', name: '', type: 'สถานที่', subdistrict: 'กะทู้', lat: '', lng: '', desc: '' });
   const [leaderForm, setLeaderForm] = useState({ id: '', name: '', moo: '', villageName: '', position: '', subdistrict: 'กะทู้', district: 'กะทู้', phone: '' });
   const [filterSubdistrict, setFilterSubdistrict] = useState('');
   const [villageFilter, setVillageFilter] = useState('ทั้งหมด');
@@ -445,6 +451,24 @@ function DashboardApp() {
   const [reportMonthFilter, setReportMonthFilter] = useState('ทั้งหมด');
   const [reportStatusFilter, setReportStatusFilter] = useState('ทั้งหมด');
 
+  const defaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+
+function LocationPicker({ position, setPosition }) {
+  useMapEvents({
+    click(e) {
+      setPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+    },
+  });
+  return position.lat && position.lng ? (
+    <Marker position={[position.lat, position.lng]} icon={defaultIcon} />
+  ) : null;
+}
+
   // Report Form States
   const [selectedReport, setSelectedReport] = useState(null);
   const [reportFormData, setReportFormData] = useState({
@@ -533,6 +557,7 @@ function DashboardApp() {
     setGroupTypes(getGroupTypes());
     setReports(getReports());
     setLeaders(getLeaders());
+    setPlaces(getPlaces());
     setWomenStats(getWomenStats());
     setWomenProjects(getWomenProjects());
     setTpmapStats(getTpmapStats());
@@ -775,6 +800,43 @@ function DashboardApp() {
     try {
       const allLeaders = leaders.filter(l => l.id !== leaderForm.id);
       await saveLeaders(allLeaders);
+      await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSavePlace = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const allPlaces = [...places];
+      if (modalType === 'place_edit') {
+        const index = allPlaces.findIndex(p => p.id === placeForm.id);
+        if (index > -1) allPlaces[index] = placeForm;
+      } else {
+        allPlaces.push({ ...placeForm, id: 'pl_' + Date.now() });
+      }
+      await savePlaces(allPlaces);
+      await reloadData();
+      setModalType(null);
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeletePlace = async () => {
+    setIsLoading(true);
+    try {
+      const allPlaces = places.filter(p => p.id !== placeForm.id);
+      await savePlaces(allPlaces);
       await reloadData();
       setModalType(null);
     } catch (err) {
@@ -1752,6 +1814,9 @@ function DashboardApp() {
                 <button className={`tab-btn ${adminTab === 'budgets' ? 'active' : ''}`} onClick={async () => setAdminTab('budgets')}>
                   💰 จัดการงบประมาณและเบิกจ่าย ({monthlyBudgets.length})
                 </button>
+                <button className={`tab-btn ${adminTab === 'places' ? 'active' : ''}`} onClick={async () => setAdminTab('places')}>
+                  📍 จัดการสถานที่ GIS ({places.length})
+                </button>
               </div>
 
               {/* ADMIN TAB 1: GROUPS MANAGEMENT (เพิ่ม ลบ แก้ไข กลุ่มพัฒนารายอำเภอ) */}
@@ -2713,6 +2778,60 @@ function DashboardApp() {
             </div>
           )}
 
+          {/* ADMIN TAB 12: GIS PLACES MANAGEMENT */}
+          {adminTab === 'places' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
+              <div className="filter-bar">
+                <button className="btn-add-new" onClick={async () => { setPlaceForm({ id: '', name: '', type: 'สถานที่', subdistrict: 'กะทู้', lat: '', lng: '', desc: '' }); setModalType('place_add'); }}>
+                  <Plus size={16} /> เพิ่มสถานที่/พิกัด
+                </button>
+              </div>
+              <div className="data-table-wrapper">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>ชื่อสถานที่/กลุ่ม</th>
+                      <th>ประเภท</th>
+                      <th>ตำบล</th>
+                      <th>ละติจูด (Lat)</th>
+                      <th>ลองจิจูด (Lng)</th>
+                      <th style={{ width: '100px', textAlign: 'center' }}>จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {places.map((p, idx) => (
+                      <tr key={p.id || idx}>
+                        <td style={{ fontWeight: '500' }}>{p.name}</td>
+                        <td><span className="status-badge" style={{ backgroundColor: '#e2e8f0', color: '#334155' }}>{p.type}</span></td>
+                        <td>{p.subdistrict}</td>
+                        <td>
+                          {p.lat || '-'}
+                          {p.lat && p.lng && (
+                            <div style={{ marginTop: '5px' }}>
+                              <a href={`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#3b82f6', textDecoration: 'none', backgroundColor: '#eff6ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #bfdbfe', display: 'inline-block' }}>
+                                🗺️ เปิดในแผนที่
+                              </a>
+                            </div>
+                          )}
+                        </td>
+                        <td>{p.lng || '-'}</td>
+                        <td>
+                          <div className="action-buttons" style={{ justifyContent: 'center' }}>
+                            <button className="btn-action edit" onClick={async () => { setPlaceForm(p); setModalType('place_edit'); }}><Edit2 size={12} /></button>
+                            <button className="btn-action delete" onClick={async () => { setPlaceForm(p); setModalType('place_delete'); }}><Trash2 size={12} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {places.length === 0 && (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>ยังไม่มีข้อมูลสถานที่</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* Reset system button at the bottom of the Admin Panel */}
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px' }}>
             <button 
@@ -3629,32 +3748,60 @@ function DashboardApp() {
 
               {/* PAGE 6: GIS */}
               {activeMenu === 'GIS' && (
-                <div className="gis-layout">
-                  <div className="map-card">
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
-                      <svg className="svg-map" viewBox="0 0 350 400">
-                        {mapPaths.map((p, idx) => (
-                          <path
-                            key={idx}
-                            d={p.d}
-                            className={`map-district-path ${selectedGisDistrict === p.name ? 'selected' : ''}`}
-                            onClick={async () => setSelectedGisDistrict(p.name)}
-                          />
-                        ))}
-                      </svg>
-                      <span style={{ fontSize: '12px', marginTop: '10px', color: 'var(--text-muted)' }}>คลิกพื้นที่ในแผนที่จำลองเพื่อเลือกอำเภอ</span>
-                    </div>
+                <div className="gis-layout" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="map-card" style={{ height: '500px', width: '100%', padding: '0', overflow: 'hidden' }}>
+                    <MapContainer center={[7.9171, 98.3341]} zoom={12} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      {places.filter(p => p.lat && p.lng).map(place => (
+                        <Marker key={place.id} position={[parseFloat(place.lat), parseFloat(place.lng)]} icon={defaultIcon}>
+                          <Popup>
+                            <strong>{place.name}</strong><br />
+                            ประเภท: {place.type}<br />
+                            ตำบล: {place.subdistrict}<br />
+                            {place.desc && <span>{place.desc}<br /></span>}
+                            <a href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: '5px', fontSize: '12px', color: '#3b82f6', textDecoration: 'none', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                              🗺️ เปิดในแผนที่
+                            </a>
+                          </Popup>
+                        </Marker>
+                      ))}
+                    </MapContainer>
                   </div>
-                  <div className="dashboard-card gis-details-card">
-                    <h2 className="dashboard-card-title">📍 ข้อมูลอำเภอที่เลือก: {gisDistrictData.name}</h2>
-                    <div className="gis-info-grid">
-                      <div className="gis-info-item"><span className="gis-info-label">🏠 หมู่บ้าน</span><div className="gis-info-value">{gisDistrictData.villages}</div></div>
-                      <div className="gis-info-item"><span className="gis-info-label">👥 ครัวเรือน</span><div className="gis-info-value">{formatCurrency(gisDistrictData.households)}</div></div>
-                      <div className="gis-info-item"><span className="gis-info-label">💰 งบประมาณที่ได้รับ</span><div className="gis-info-value">{formatCurrency(gisDistrictData.budget.received)}</div></div>
-                      <div className="gis-info-item"><span className="gis-info-label">💸 อัตราเบิกจ่าย</span><div className="gis-info-value">{((gisDistrictData.budget.disbursed/gisDistrictData.budget.received)*100).toFixed(1)}%</div></div>
-                      <div className="gis-info-item"><span className="gis-info-label">✅ KPI ผ่านเป้า</span><div className="gis-info-value">{gisDistrictData.kpi.success} / {gisDistrictData.kpi.total}</div></div>
-                      <div className="gis-info-item"><span className="gis-info-label">🛍️ ยอดจำหน่าย OTOP</span><div className="gis-info-value">{formatCurrency(gisDistrictData.otopSales)}</div></div>
-                    </div>
+                  <div className="dashboard-card gis-details-card" style={{ width: '100%' }}>
+                    <h2 className="dashboard-card-title">📍 ข้อมูลสถานที่ในพื้นที่</h2>
+                    <table className="summary-table">
+                      <thead>
+                        <tr>
+                          <th>ชื่อสถานที่/กลุ่ม</th>
+                          <th>ประเภท</th>
+                          <th>ตำบล</th>
+                          <th>รายละเอียด</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {places.map((p, idx) => (
+                          <tr key={p.id || idx}>
+                            <td style={{ fontWeight: '500' }}>{p.name}</td>
+                            <td>{p.type}</td>
+                            <td>{p.subdistrict}</td>
+                            <td>
+                              {p.desc || '-'}
+                              {p.lat && p.lng && (
+                                <a href={`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginLeft: '10px', fontSize: '12px', color: '#3b82f6', textDecoration: 'none', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                                  🗺️ เปิดในแผนที่
+                                </a>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {places.length === 0 && (
+                          <tr><td colSpan="4" style={{ textAlign: 'center', color: '#64748b' }}>ยังไม่มีข้อมูลสถานที่</td></tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
@@ -4354,6 +4501,109 @@ function DashboardApp() {
             <div className="modal-footer" style={{ justifyContent: 'center' }}>
               <button type="button" className="btn-cancel" onClick={async () => setModalType(null)} disabled={isLoading}>ยกเลิก</button>
               <button type="button" className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeleteLeader} disabled={isLoading}>
+                {isLoading ? 'กำลังลบ...' : 'ลบข้อมูล'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Place Modals */}
+      {(modalType === 'place_add' || modalType === 'place_edit') && (
+        <div className="modal-backdrop">
+          <div className="modal-content slide-in" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {modalType === 'place_add' ? <Plus size={16} /> : <Edit2 size={12} />}
+                {modalType === 'place_add' ? 'เพิ่มสถานที่/พิกัด' : 'แก้ไขสถานที่/พิกัด'}
+              </h3>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleSavePlace}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">ชื่อสถานที่/กลุ่ม <span className="required">*</span></label>
+                  <input type="text" className="form-input" required value={placeForm.name} onChange={e => setPlaceForm({...placeForm, name: e.target.value})} placeholder="เช่น ที่ว่าการอำเภอกะทู้" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="form-group">
+                    <label className="form-label">ประเภท <span className="required">*</span></label>
+                    <select className="form-input" required value={placeForm.type} onChange={e => setPlaceForm({...placeForm, type: e.target.value})}>
+                      <option value="สถานที่">สถานที่</option>
+                      <option value="กลุ่ม/องค์กร">กลุ่ม/องค์กร</option>
+                      <option value="โครงการ">โครงการ</option>
+                      <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">ตำบล <span className="required">*</span></label>
+                    <select className="form-input" value={placeForm.subdistrict} onChange={e => setPlaceForm({...placeForm, subdistrict: e.target.value})}>
+                      <option value="กะทู้">กะทู้</option>
+                      <option value="ป่าตอง">ป่าตอง</option>
+                      <option value="กมลา">กมลา</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">รายละเอียดเพิ่มเติม</label>
+                  <textarea className="form-input" rows="3" value={placeForm.desc} onChange={e => setPlaceForm({...placeForm, desc: e.target.value})} placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับสถานที่นี้" />
+                </div>
+                <div style={{ padding: '15px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)', marginBottom: '15px' }}>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#60a5fa', fontWeight: 'bold' }}>พิกัดทางภูมิศาสตร์ (GPS)</p>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: 'var(--text-muted)' }}>* หากทราบพิกัด สามารถกรอกได้เลย หรือไปที่ Google Maps แล้วคลิกขวาที่สถานที่เพื่อคัดลอกพิกัดมาวาง</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '13px' }}>ละติจูด (Latitude)</label>
+                      <input type="number" step="any" className="form-input" value={placeForm.lat} onChange={e => setPlaceForm({...placeForm, lat: e.target.value})} placeholder="เช่น 7.9171" />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '13px' }}>ลองจิจูด (Longitude)</label>
+                      <input type="number" step="any" className="form-input" value={placeForm.lng} onChange={e => setPlaceForm({...placeForm, lng: e.target.value})} placeholder="เช่น 98.3341" />
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '15px', height: '200px', width: '100%', borderRadius: '8px', overflow: 'hidden' }}>
+                    <MapContainer center={[placeForm.lat || 7.9171, placeForm.lng || 98.3341]} zoom={12} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <LocationPicker 
+                        position={{ lat: parseFloat(placeForm.lat), lng: parseFloat(placeForm.lng) }} 
+                        setPosition={(pos) => setPlaceForm({...placeForm, lat: pos.lat, lng: pos.lng})} 
+                      />
+                    </MapContainer>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={async () => setModalType(null)} disabled={isLoading}>ยกเลิก</button>
+                <button type="submit" className="btn-submit-blue" disabled={isLoading}>
+                  {isLoading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modalType === 'place_delete' && (
+        <div className="modal-backdrop">
+          <div className="modal-content confirm-width slide-in">
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ color: '#ef4444' }}><Trash2 size={16} /> ยืนยันการลบ</h3>
+              <button className="btn-close-modal" onClick={async () => setModalType(null)}><X size={20} /></button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '30px 20px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', marginBottom: '20px' }}>
+                <AlertTriangle size={32} />
+              </div>
+              <p style={{ fontSize: '16px', color: 'var(--text-light)', margin: '0 0 10px 0' }}>คุณต้องการลบสถานที่</p>
+              <h4 style={{ fontSize: '20px', color: '#fff', margin: '0' }}>{placeForm.name}</h4>
+              <p style={{ color: 'var(--danger)', fontSize: '14px', marginTop: '15px' }}>การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+            </div>
+            <div className="modal-footer" style={{ justifyContent: 'center' }}>
+              <button type="button" className="btn-cancel" onClick={async () => setModalType(null)} disabled={isLoading}>ยกเลิก</button>
+              <button type="button" className="btn-submit-blue" style={{ backgroundColor: '#ef4444' }} onClick={handleDeletePlace} disabled={isLoading}>
                 {isLoading ? 'กำลังลบ...' : 'ลบข้อมูล'}
               </button>
             </div>
