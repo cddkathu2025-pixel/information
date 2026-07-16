@@ -414,10 +414,11 @@ function DashboardApp() {
 
   // Documents States
   const [documents, setDocuments] = useState(() => getDocuments());
+  const [docCategoryFilter, setDocCategoryFilter] = useState('ทั้งหมด');
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentForm, setDocumentForm] = useState({
     name: '',
-    category: 'OTOP',
+    category: 'อื่นๆ',
     type: 'PDF',
     size: '100 KB',
     link: ''
@@ -2701,7 +2702,7 @@ function LocationPicker({ position, setPosition }) {
                             <td style={{ fontWeight: '700' }}>{d.name}</td>
                             <td>
                               <span className="status-badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.2)', fontSize: '11px', padding: '2px 8px' }}>
-                                {d.category === 'OTOP' ? 'OTOP / วิสาหกิจ' : d.category === 'กองทุนสตรี' ? 'กองทุนพัฒนาสตรี' : d.category === 'องค์กรชุมชน' ? 'กลุ่ม/องค์กรชุมชน' : d.category}
+                                {d.category || 'อื่นๆ'}
                               </span>
                             </td>
                             <td>{d.type || 'PDF'}</td>
@@ -4213,8 +4214,39 @@ function LocationPicker({ position, setPosition }) {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
                       {(() => {
+                        const categories = ['ทั้งหมด', 'การเงิน', 'ยุทธศาสตร์', 'OTOP', 'กองทุนพัฒนาบทบาทสตรี', 'ออมทรัพย์', 'กข.คจ', 'กองทุนแม่ของแผ่นดิน', 'อื่นๆ'];
+                        return (
+                          <div style={{ gridColumn: '1 / -1', marginBottom: '5px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {categories.map(cat => (
+                              <button 
+                                key={cat}
+                                onClick={() => setDocCategoryFilter(cat)}
+                                style={{
+                                  padding: '6px 14px',
+                                  borderRadius: '20px',
+                                  border: docCategoryFilter === cat ? 'none' : '1px solid var(--border-color)',
+                                  backgroundColor: docCategoryFilter === cat ? 'var(--primary)' : 'var(--bg-color)',
+                                  color: docCategoryFilter === cat ? 'white' : 'var(--text-color)',
+                                  cursor: 'pointer',
+                                  fontSize: '13px',
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: docCategoryFilter === cat ? '0 4px 6px rgba(59, 130, 246, 0.2)' : 'none'
+                                }}
+                              >
+                                {cat}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                      
+                      {(() => {
                         const docsByCategory = {};
-                        documents.forEach(doc => {
+                        const filteredDocuments = docCategoryFilter === 'ทั้งหมด' 
+                          ? documents 
+                          : documents.filter(d => (d.category || 'อื่นๆ') === docCategoryFilter);
+
+                        filteredDocuments.forEach(doc => {
                           const cat = doc.category || 'อื่นๆ';
                           if (!docsByCategory[cat]) {
                             docsByCategory[cat] = [];
@@ -4222,10 +4254,10 @@ function LocationPicker({ position, setPosition }) {
                           docsByCategory[cat].push(doc);
                         });
 
-                        if (documents.length === 0) {
+                        if (filteredDocuments.length === 0) {
                           return (
                             <div style={{ gridColumn: 'span 3', textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                              ยังไม่มีไฟล์เอกสารในระบบดาวน์โหลด
+                              ยังไม่มีไฟล์เอกสารในหมวดหมู่นี้
                             </div>
                           );
                         }
@@ -4236,18 +4268,27 @@ function LocationPicker({ position, setPosition }) {
                           if (catName === 'OTOP') {
                             headerColor = '#60a5fa';
                             headerEmoji = '🛍️';
-                          } else if (catName === 'กองทุนสตรี') {
+                          } else if (catName === 'กองทุนพัฒนาบทบาทสตรี') {
+                            headerColor = '#f472b6';
+                            headerEmoji = '👩';
+                          } else if (catName === 'การเงิน') {
                             headerColor = '#34d399';
-                            headerEmoji = '👥';
-                          } else if (catName === 'องค์กรชุมชน') {
+                            headerEmoji = '💰';
+                          } else if (catName === 'ออมทรัพย์') {
                             headerColor = '#fbbf24';
-                            headerEmoji = '🏢';
+                            headerEmoji = '🪙';
+                          } else if (catName === 'กข.คจ') {
+                            headerColor = '#a78bfa';
+                            headerEmoji = '🤝';
+                          } else if (catName === 'กองทุนแม่ของแผ่นดิน') {
+                            headerColor = '#38bdf8';
+                            headerEmoji = '👑';
+                          } else if (catName === 'ยุทธศาสตร์') {
+                            headerColor = '#fb7185';
+                            headerEmoji = '🎯';
                           }
                           
-                          const groupTitle = catName === 'OTOP' ? 'แบบฟอร์มงาน OTOP และวิสาหกิจชุมชน' :
-                                             catName === 'กองทุนสตรี' ? 'แบบฟอร์มกองทุนพัฒนาบทบาทสตรี' :
-                                             catName === 'องค์กรชุมชน' ? 'แบบฟอร์มกลุ่มและองค์กรชุมชน' :
-                                             catName;
+                          const groupTitle = catName;
 
                           return (
                             <div key={catName} style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '18px', backgroundColor: 'rgba(255,255,255,0.01)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -4892,6 +4933,7 @@ function LocationPicker({ position, setPosition }) {
                     <input type="number" className="form-input" value={districtFormData.budgetReceived} onChange={e => setDistrictFormData({...districtFormData, budgetReceived: e.target.value})} />
                   </div>
 
+
                   <div className="form-group">
                     <label>งบเบิกจ่ายแล้วสะสม (บาท)</label>
                     <input type="number" className="form-input" value={districtFormData.budgetDisbursed} onChange={e => setDistrictFormData({...districtFormData, budgetDisbursed: e.target.value})} />
@@ -5446,9 +5488,14 @@ function LocationPicker({ position, setPosition }) {
                       value={documentForm.category} 
                       onChange={e => setDocumentForm({...documentForm, category: e.target.value})}
                     >
-                      <option value="OTOP">OTOP / วิสาหกิจชุมชน</option>
-                      <option value="กองทุนสตรี">กองทุนพัฒนาบทบาทสตรี</option>
-                      <option value="องค์กรชุมชน">กลุ่มและองค์กรชุมชน</option>
+                      <option value="การเงิน">การเงิน</option>
+                      <option value="ยุทธศาสตร์">ยุทธศาสตร์</option>
+                      <option value="OTOP">OTOP</option>
+                      <option value="กองทุนพัฒนาบทบาทสตรี">กองทุนพัฒนาบทบาทสตรี</option>
+                      <option value="ออมทรัพย์">ออมทรัพย์</option>
+                      <option value="กข.คจ">กข.คจ</option>
+                      <option value="กองทุนแม่ของแผ่นดิน">กองทุนแม่ของแผ่นดิน</option>
+                      <option value="อื่นๆ">อื่นๆ</option>
                     </select>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
